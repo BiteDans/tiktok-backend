@@ -7,6 +7,7 @@ import (
 
 	example "BiteDans.com/tiktok-backend/biz/model/hello/example"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
@@ -18,10 +19,12 @@ func HelloMethod(ctx context.Context, c *app.RequestContext) {
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
+		hlog.Errorf("HERTZ: Received bad request, %v", err)
 		return
 	}
 
 	resp := new(example.HelloResp)
 
+	hlog.Infof("HERTZ: Received good request")
 	c.JSON(consts.StatusOK, resp)
 }
