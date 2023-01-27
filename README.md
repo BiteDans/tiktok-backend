@@ -2,7 +2,7 @@
 
 Tiktok-backend is the backend module for Bytedance Bootcamp Tiktok project. We use Go, Hertz, Gorm and Docker to build this server.
 
-# Running the porject
+# Running the project
 
 To run the project, we first run the following command to fetch the dependencies:
 
@@ -26,3 +26,25 @@ go build
 ```
 
 to start the server.
+
+# IDL(Interface Description Language)
+We use the command line tool `hz` provided by `hertz` to generate the basic code.
+
+`hz` looks at your interface definitaions in  `.thrift` files (e.g. /idl/hello.thrift) and automatically generates a skaffold.
+
+## Start a project
+After creating a .thrift file
+```
+// GOPATH 下执行
+hz new -idl idl/hello.thrift
+
+// outside of GOPATH
+hz new -idl idl/hello.thrift -mod <module name>
+```
+
+## Update a project
+If we wish to continue using `hz` to generate code in the future, we need to update our .thrift files to include new interface definitions and run
+```
+hz update -idl idl/hello.thrift
+```
+For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
