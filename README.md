@@ -28,14 +28,17 @@ go build
 to start the server.
 
 # IDL(Interface Description Language)
+
 We use the command line tool `hz` provided by `hertz` to generate the basic code.
 
-`hz` looks at your interface definitaions in  `.thrift` files (e.g. /idl/hello.thrift) and automatically generates a skaffold.
+`hz` looks at your interface definitaions in `.thrift` files (e.g. /idl/hello.thrift) and automatically generates a skaffold.
 
 ## Start a project
+
 After creating a .thrift file
+
 ```
-// GOPATH 下执行
+// under GOPATH
 hz new -idl idl/hello.thrift
 
 // outside of GOPATH
@@ -43,8 +46,11 @@ hz new -idl idl/hello.thrift -mod <module name>
 ```
 
 ## Update a project
+
 If we wish to continue using `hz` to generate code in the future, we need to update our .thrift files to include new interface definitions and run
+
 ```
 hz update -idl idl/hello.thrift
 ```
+
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
