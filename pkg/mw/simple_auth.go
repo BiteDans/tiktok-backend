@@ -20,7 +20,7 @@ func AuthMiddleware() app.HandlerFunc {
 		}
 
 		if req.Token != "token" {
-			c.Error(errors.NewPublic("User is not logged in!"))
+			c.Error(errors.NewPublic("User is not logged in"))
 			return
 		}
 	}

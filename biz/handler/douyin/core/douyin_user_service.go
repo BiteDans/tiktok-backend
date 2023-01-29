@@ -23,18 +23,17 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(core.DouyinUserRegisterResponse)
-
 	user := new(model.User)
-	user.Username = req.Username
-	user.Password = req.Password
 
-	var findUser int64
-	if findUser = model.FindUserByUsername(user); findUser != 0 {
+	if err = model.FindUserByUsername(user, req.Username); err == nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Username has been used"
 		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
+
+	user.Username = req.Username
+	user.Password = req.Password
 
 	if err = model.RegisterUser(user); err != nil {
 		resp.StatusCode = -1
@@ -73,13 +72,23 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	user := new(model.User)
+
+	if err = model.FindUserById(user, uint(req.UserId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.User = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
 	resp.User = &core.User{
-		ID:            666,
-		Name:          "Bob",
-		FollowCount:   1000,
-		FollowerCount: 5999,
+		ID:            int64(user.ID),
+		Name:          user.Username,
+		FollowCount:   123,
+		FollowerCount: 456,
 		IsFollow:      true,
 	}
 
