@@ -28,6 +28,13 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	user.Username = req.Username
 	user.Password = req.Password
 
+	var findUser int64
+	if findUser = model.FindUser(user); findUser != 0 {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Username has been used"
+		c.JSON(500, resp)
+		return
+	}
 	if err = model.RegisterUser(user); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to register user"
