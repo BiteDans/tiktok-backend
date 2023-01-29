@@ -32,13 +32,14 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	if findUser = model.FindUserByUsername(user); findUser != 0 {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Username has been used"
-		c.JSON(400, resp)
+		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
+
 	if err = model.RegisterUser(user); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to register user"
-		c.JSON(500, resp)
+		c.JSON(consts.StatusInternalServerError, resp)
 		return
 	}
 
@@ -46,6 +47,41 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	resp.StatusMsg = "User registered successfully"
 	resp.UserId = int64(user.ID)
 	resp.Token = "token"
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// UserInfo .
+// @router /douyin/user [GET]
+func UserInfo(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req core.DouyinUserRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp := new(core.DouyinUserResponse)
+
+	if _error := c.Errors.Last(); _error != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = _error.Error()
+		resp.User = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "User info retrieved successfully"
+	resp.User = &core.User{
+		ID:            666,
+		Name:          "Bob",
+		FollowCount:   1000,
+		FollowerCount: 5999,
+		IsFollow:      true,
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }

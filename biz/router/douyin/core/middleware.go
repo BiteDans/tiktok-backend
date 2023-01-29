@@ -3,6 +3,7 @@
 package Core
 
 import (
+	"BiteDans.com/tiktok-backend/pkg/mw"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -29,4 +30,10 @@ func _registerMw() []app.HandlerFunc {
 func _registeruserMw() []app.HandlerFunc {
 	// your code...
 	return nil
+}
+
+func _userinfoMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.AuthMiddleware(),
+	}
 }

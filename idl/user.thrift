@@ -1,16 +1,36 @@
 namespace go douyin.core
 
+struct User {
+    1: i64 id
+    2: string name
+    3: i64 followCount (api.body="follow_count")
+    4: i64 followerCount (api.body="follower_count")
+    5: bool isFollow (api.body="is_follow")
+}
+
 struct douyinUserRegisterRequest {
-    1: string username (api.query="username");
-    2: string password (api.query="password");
+    1: string username (api.query="username")
+    2: string password (api.query="password")
 }
 struct douyinUserRegisterResponse {
-    1: i32 statusCode
-    2: string statusMsg
-    3: i64 userId
+    1: i32 statusCode (api.body="status_code")
+    2: string statusMsg (api.body="status_msg")
+    3: i64 userId (api.body="user_id")
     4: string token
 }
 
+struct douyinUserRequest {
+    1: i64 userId (api.query="user_id")
+    2: string token (api.query="token")
+}
+
+struct douyinUserResponse {
+    1: i32 statusCode (api.body="status_code")
+    2: string statusMsg (api.body="status_msg")
+    3: User user
+}
+
 service douyinUserService {
-    douyinUserRegisterResponse RegisterUser(1: douyinUserRegisterRequest req) (api.post="/douyin/user/register/");
+    douyinUserRegisterResponse RegisterUser(1: douyinUserRegisterRequest req) (api.post="/douyin/user/register/")
+    douyinUserResponse UserInfo(1: douyinUserRequest req) (api.get="/douyin/user")
 }
