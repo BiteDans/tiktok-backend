@@ -27,6 +27,11 @@ go build
 
 to start the server.
 
+To connect the database from your local machine, run
+```
+mysql -h 127.0.0.1 -P 3307 -u gorm -p 
+// password=gorm 
+```
 # IDL(Interface Description Language)
 
 We use the command line tool `hz` provided by `hertz` to generate the basic code.
@@ -35,7 +40,7 @@ We use the command line tool `hz` provided by `hertz` to generate the basic code
 
 ## Start a project
 
-After creating a .thrift file
+After creating a `.thrift` file
 
 ```
 // under GOPATH
@@ -54,3 +59,12 @@ hz update -idl idl/hello.thrift
 ```
 
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
+
+# User Authentication
+
+## User Registeration
+
+To register a new user
+```
+curl --location --request POST 'localhost:8888/douyin/user/register?username=<username>&password=<password>'
+```
