@@ -11,17 +11,19 @@ import (
 )
 
 func main() {
-	// f, err := os.OpenFile("./output.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	// if err != nil {
-	// 	panic(err)
-	// }
-	// defer f.Close()
-
-	hlog.SetOutput(os.Stdout)
-	hlog.SetLevel(hlog.LevelInfo)
-
 	h := server.Default()
 
+	//set up logger
+	f, err := os.OpenFile("./output.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+
+	hlog.SetOutput(f)
+	hlog.SetLevel(hlog.LevelInfo)
+
+	// init database
 	dal.Init()
 
 	register(h)

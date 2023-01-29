@@ -15,8 +15,8 @@ func (u *User) TableName() string {
 	return "user"
 }
 
-func FindUser(u *User) int64 {
-	return dal.DB.Find(&u).RowsAffected
+func FindUserByUsername(u *User) int64 {
+	return dal.DB.First(&u, "username = ?", u.Username).RowsAffected
 }
 func RegisterUser(u *User) error {
 	return dal.DB.Create(u).Error

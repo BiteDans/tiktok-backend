@@ -29,10 +29,10 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	user.Password = req.Password
 
 	var findUser int64
-	if findUser = model.FindUser(user); findUser != 0 {
+	if findUser = model.FindUserByUsername(user); findUser != 0 {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Username has been used"
-		c.JSON(500, resp)
+		c.JSON(400, resp)
 		return
 	}
 	if err = model.RegisterUser(user); err != nil {
@@ -43,7 +43,7 @@ func RegisterUser(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp.StatusCode = 0
-	resp.StatusMsg = "User registered succesfully"
+	resp.StatusMsg = "User registered successfully"
 	resp.UserId = int64(user.ID)
 	resp.Token = "token"
 
