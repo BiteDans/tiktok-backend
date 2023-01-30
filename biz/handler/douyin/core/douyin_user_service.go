@@ -118,7 +118,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	if err = model.FindUserByUsername(user, req.Username); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to login (Username not found)"
-		c.JSON(consts.StatusInternalServerError, resp)
+		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
 	fmt.Println(user.Password)
@@ -126,7 +126,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	if inputpassword != user.Password {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to login (Incorrect password)"
-		c.JSON(consts.StatusInternalServerError, resp)
+		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
 
