@@ -6,6 +6,7 @@ import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	core "BiteDans.com/tiktok-backend/biz/model/douyin/core"
 	"context"
+	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
@@ -112,19 +113,17 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	user.Password = req.Password
 
 	var inputpassword string
-	var getpassword string
-
 	inputpassword = user.Password
 
-	err, getpassword = model.LoginUser(user)
-	if err != nil {
+	if err = model.FindUserByUsername(user, req.Username); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to login (Username not found)"
 		c.JSON(consts.StatusInternalServerError, resp)
 		return
 	}
+	fmt.Println(user.Password)
 
-	if inputpassword != getpassword {
+	if inputpassword != user.Password {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to login (Incorrect password)"
 		c.JSON(consts.StatusInternalServerError, resp)

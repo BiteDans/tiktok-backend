@@ -2,7 +2,6 @@ package model
 
 import (
 	"BiteDans.com/tiktok-backend/biz/dal"
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -26,11 +25,4 @@ func FindUserByUsername(u *User, username string) error {
 
 func RegisterUser(u *User) error {
 	return dal.DB.Create(u).Error
-}
-
-func LoginUser(u *User) (error, string) {
-	var err error
-	err = dal.DB.Take(&u, "username = ?", u.Username).Error
-	fmt.Println(u.Password)
-	return err, u.Password
 }
