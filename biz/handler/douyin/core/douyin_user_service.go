@@ -94,9 +94,9 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-// Login .
+// UserLogin .
 // @router /douyin/login [POST]
-func Login(ctx context.Context, c *app.RequestContext) {
+func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req core.DouyinUserLoginRequest
 	err = c.BindAndValidate(&req)

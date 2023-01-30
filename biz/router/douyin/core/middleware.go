@@ -38,7 +38,7 @@ func _userinfoMw() []app.HandlerFunc {
 	}
 }
 
-func _loginMw() []app.HandlerFunc {
+func _userloginMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
