@@ -37,3 +37,8 @@ func _userinfoMw() []app.HandlerFunc {
 		mw.AuthMiddleware(),
 	}
 }
+
+func _loginMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

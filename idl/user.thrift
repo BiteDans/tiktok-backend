@@ -12,6 +12,7 @@ struct douyinUserRegisterRequest {
     1: string username (api.query="username")
     2: string password (api.query="password")
 }
+
 struct douyinUserRegisterResponse {
     1: i32 statusCode (api.body="status_code")
     2: string statusMsg (api.body="status_msg")
@@ -30,7 +31,20 @@ struct douyinUserResponse {
     3: User user
 }
 
+struct douyinUserLoginRequest {
+    1: string username (api.query="username")
+    2: string password (api.query="password")
+}
+
+struct douyinUserLoginResponse {
+    1: i32 statusCode (api.body="status_code")
+    2: string statusMsg (api.body="status_msg")
+    3: i64 userId (api.query="user_id")
+    4: string token (api.query="token")
+}
+
 service douyinUserService {
     douyinUserRegisterResponse RegisterUser(1: douyinUserRegisterRequest req) (api.post="/douyin/user/register/")
     douyinUserResponse UserInfo(1: douyinUserRequest req) (api.get="/douyin/user")
+    douyinUserLoginResponse Login(1: douyinUserLoginRequest req) (api.post="/douyin/login")
 }
