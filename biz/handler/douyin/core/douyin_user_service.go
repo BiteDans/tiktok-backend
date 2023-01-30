@@ -57,7 +57,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 }
 
 // UserLogin .
-// @router /douyin/usr/login [POST]
+// @router /douyin/user/login/ [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req core.DouyinUserLoginRequest
