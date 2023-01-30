@@ -23,6 +23,6 @@ func FindUserByUsername(u *User, username string) error {
 	return dal.DB.First(&u, "username = ?", username).Error
 }
 
-func RegisterUser(u *User) error {
+func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
 }

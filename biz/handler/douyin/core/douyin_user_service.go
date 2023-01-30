@@ -3,52 +3,13 @@
 package core
 
 import (
+	"context"
+
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	core "BiteDans.com/tiktok-backend/biz/model/douyin/core"
-	"context"
-	"fmt"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
-
-// RegisterUser .
-// @router /douyin/user/register/ [POST]
-func RegisterUser(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req core.DouyinUserRegisterRequest
-	err = c.BindAndValidate(&req)
-	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
-		return
-	}
-
-	resp := new(core.DouyinUserRegisterResponse)
-	user := new(model.User)
-
-	if err = model.FindUserByUsername(user, req.Username); err == nil {
-		resp.StatusCode = -1
-		resp.StatusMsg = "Username has been used"
-		c.JSON(consts.StatusBadRequest, resp)
-		return
-	}
-
-	user.Username = req.Username
-	user.Password = req.Password
-
-	if err = model.RegisterUser(user); err != nil {
-		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to register user"
-		c.JSON(consts.StatusInternalServerError, resp)
-		return
-	}
-
-	resp.StatusCode = 0
-	resp.StatusMsg = "User registered successfully"
-	resp.UserId = int64(user.ID)
-	resp.Token = "token"
-
-	c.JSON(consts.StatusOK, resp)
-}
 
 // UserInfo .
 // @router /douyin/user [GET]
@@ -96,7 +57,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 }
 
 // UserLogin .
-// @router /douyin/login [POST]
+// @router /douyin/usr/login [POST]
 func UserLogin(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req core.DouyinUserLoginRequest
@@ -112,26 +73,63 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 	user.Username = req.Username
 	user.Password = req.Password
 
-	var inputpassword string
-	inputpassword = user.Password
+	var inputpassword = user.Password
 
 	if err = model.FindUserByUsername(user, req.Username); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to login (Username not found)"
+		resp.StatusMsg = "Failed to log in (Username not found)"
 		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
-	fmt.Println(user.Password)
 
 	if inputpassword != user.Password {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to login (Incorrect password)"
+		resp.StatusMsg = "Failed to log in (Incorrect password)"
 		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
 
 	resp.StatusCode = 0
-	resp.StatusMsg = "User login successfully"
+	resp.StatusMsg = "User logged in successfully"
+	resp.UserId = int64(user.ID)
+	resp.Token = "token"
+
+	c.JSON(consts.StatusOK, resp)
+}
+
+// UserRegister .
+// @router /douyin/user/register/ [POST]
+func UserRegister(ctx context.Context, c *app.RequestContext) {
+	var err error
+	var req core.DouyinUserRegisterRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp := new(core.DouyinUserRegisterResponse)
+	user := new(model.User)
+
+	if err = model.FindUserByUsername(user, req.Username); err == nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Username has been used"
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	user.Username = req.Username
+	user.Password = req.Password
+
+	if err = model.CreateUser(user); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to register user"
+		c.JSON(consts.StatusInternalServerError, resp)
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "User registered successfully"
 	resp.UserId = int64(user.ID)
 	resp.Token = "token"
 

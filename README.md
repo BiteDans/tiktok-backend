@@ -62,4 +62,21 @@ For more details, refer to [hz's official documents](https://www.cloudwego.io/zh
 
 # User Authentication
 
-## User Registeration
+We have created a middleware `AuthMiddleware` for simple token authentication.
+
+Use `GET /douyin/user` as an example.
+
+First, find the corresponding function that returns the middelwares for the route
+```go
+// /biz/router/douyin/core/user.go
+_douyin.GET("/user", append(_userMw(), core.UserInfo)...)
+```
+Then put the middleware in the returning slice
+```go
+// /biz/router/douyin/core/middleware.go
+func _userinfoMw() []app.HandlerFunc {
+	return []app.HandlerFunc{
+		mw.AuthMiddleware(),
+	}
+}
+```
