@@ -1393,8 +1393,8 @@ func (p *DouyinUserLoginRequest) String() string {
 type DouyinUserLoginResponse struct {
 	StatusCode int32  `thrift:"statusCode,1" form:"status_code" json:"status_code"`
 	StatusMsg  string `thrift:"statusMsg,2" form:"status_msg" json:"status_msg"`
-	UserId     int64  `thrift:"userId,3" json:"userId" query:"user_id"`
-	Token      string `thrift:"token,4" json:"token" query:"token"`
+	UserId     int64  `thrift:"userId,3" form:"user_id" json:"user_id"`
+	Token      string `thrift:"token,4" form:"token" json:"token"`
 }
 
 func NewDouyinUserLoginResponse() *DouyinUserLoginResponse {

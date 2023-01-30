@@ -39,8 +39,8 @@ struct douyinUserLoginRequest {
 struct douyinUserLoginResponse {
     1: i32 statusCode (api.body="status_code")
     2: string statusMsg (api.body="status_msg")
-    3: i64 userId (api.query="user_id")
-    4: string token (api.query="token")
+    3: i64 userId (api.body="user_id")
+    4: string token (api.body="token")
 }
 
 service douyinUserService {
