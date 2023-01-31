@@ -8,6 +8,7 @@ import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	core "BiteDans.com/tiktok-backend/biz/model/douyin/core"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
@@ -125,6 +126,8 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to register user"
 		c.JSON(consts.StatusInternalServerError, resp)
+
+		hlog.Error("Failed to create user into database")
 		return
 	}
 
