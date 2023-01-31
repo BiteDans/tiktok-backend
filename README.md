@@ -28,10 +28,12 @@ go build
 to start the server.
 
 To connect the database from your local machine, run
+
 ```console
-mysql -h 127.0.0.1 -P 3307 -u gorm -p 
-// password=gorm 
+mysql -h 127.0.0.1 -P 3307 -u gorm -p
+// password=gorm
 ```
+
 # IDL(Interface Description Language)
 
 We use the command line tool `hz` provided by `hertz` to generate the basic code.
@@ -59,24 +61,3 @@ hz update -idl idl/hello.thrift
 ```
 
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
-
-# User Authentication
-
-We have created a middleware `AuthMiddleware` for simple token authentication.
-
-Use `GET /douyin/user` as an example.
-
-First, find the corresponding function that returns the middelwares for the route
-```go
-// /biz/router/douyin/core/user.go
-_douyin.GET("/user", append(_userMw(), core.UserInfo)...)
-```
-Then put the middleware in the returning slice
-```go
-// /biz/router/douyin/core/middleware.go
-func _userinfoMw() []app.HandlerFunc {
-	return []app.HandlerFunc{
-		mw.AuthMiddleware(),
-	}
-}
-```
