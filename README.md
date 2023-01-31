@@ -27,6 +27,13 @@ go build
 
 to start the server.
 
+To connect the database from your local machine, run
+
+```console
+mysql -h 127.0.0.1 -P 3307 -u gorm -p
+// password=gorm
+```
+
 # IDL(Interface Description Language)
 
 We use the command line tool `hz` provided by `hertz` to generate the basic code.
@@ -35,9 +42,9 @@ We use the command line tool `hz` provided by `hertz` to generate the basic code
 
 ## Start a project
 
-After creating a .thrift file
+After creating a `.thrift` file
 
-```
+```console
 // under GOPATH
 hz new -idl idl/hello.thrift
 
@@ -49,7 +56,7 @@ hz new -idl idl/hello.thrift -mod <module name>
 
 If we wish to continue using `hz` to generate code in the future, we need to update our .thrift files to include new interface definitions and run
 
-```
+```console
 hz update -idl idl/hello.thrift
 ```
 

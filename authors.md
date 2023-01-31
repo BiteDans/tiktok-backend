@@ -1,3 +1,10 @@
+####
+
+Jan 27, 2023
+feat/user_auth @yunding wu @jiayi liu @hanyi yu
+
+Implemented the user auth module.
+
 #####
 
 Jan 26, 2023

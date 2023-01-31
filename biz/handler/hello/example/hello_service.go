@@ -25,6 +25,8 @@ func HelloMethod(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(example.HelloResp)
 
+	resp.RespBody = "hello!"
+
 	hlog.Infof("HERTZ: Received good request")
 	c.JSON(consts.StatusOK, resp)
 }
