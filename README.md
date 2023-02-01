@@ -63,16 +63,17 @@ hz update -idl idl/hello.thrift
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
 
 # Environment Variables
-To add environment variables, create `/pkg/configs/env/.env` and add variables into the file. Note that the file is ignored by git.
+To add environment variables and secrets, create `/pkg/configs/env/.env` and `/pkg/configs/env/.secret`.
+
+`.env` holds environment variables and `.secret` holds secrets like JWT keys.
 
 For example
 ```
-SECRET_1=SECRET1
-SECRET_2=SECRET2
-JWT_SECRET=THISISASECRET
+MY_ENV_VAR=THIS_IS_AN_ENV_VAR
+JWT_SECRET=THIS_IS_A_SECRET
 ```
 
 To get env variables, use `os.Getenv("SECRET_NAME")`, for example
 ```go
-var key = os.Getenv("JWT_SECRET") // returns "THISISASECRET"
+var key = os.Getenv("JWT_SECRET") // returns "THIS_IS_A_SECRET"
 ```

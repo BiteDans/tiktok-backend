@@ -6,12 +6,12 @@ import (
 )
 
 func LoadEnv() {
-	err := godotenv.Load("pkg/configs/env/.env")
+	err := godotenv.Load("pkg/configs/env/.env", "pkg/configs/env/.secret")
 
 	if err != nil {
-		hlog.Error("Failed to load .env, shutting down...")
+		hlog.Error("Failed to load env files, shutting down...")
 		panic(err)
 	}
 
-	hlog.Info(".env loaded successfully")
+	hlog.Info("Env files loaded successfully")
 }
