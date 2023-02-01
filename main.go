@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"BiteDans.com/tiktok-backend/biz/dal"
+	"BiteDans.com/tiktok-backend/pkg/configs/env"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 )
@@ -25,6 +26,9 @@ func main() {
 
 	// init database
 	dal.Init()
+
+	// load .env
+	env.LoadEnv()
 
 	register(h)
 	h.Spin()

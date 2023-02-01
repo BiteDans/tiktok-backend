@@ -3,7 +3,6 @@
 package Core
 
 import (
-	"BiteDans.com/tiktok-backend/pkg/mw"
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -18,9 +17,7 @@ func _douyinMw() []app.HandlerFunc {
 }
 
 func _userMw() []app.HandlerFunc {
-	return []app.HandlerFunc{
-		mw.AuthMiddleware(),
-	}
+	return nil
 }
 
 func _registerMw() []app.HandlerFunc {

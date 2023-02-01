@@ -22,6 +22,7 @@ func Init() {
 	)
 
 	if err != nil {
+		hlog.Error("Failed to connect to DB, shutting down...")
 		panic(err)
 	}
 
