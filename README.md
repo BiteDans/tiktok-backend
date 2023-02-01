@@ -62,8 +62,8 @@ hz update -idl idl/hello.thrift
 
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
 
-# Enviroment Variables
-To add enviroment variables, create `/pgk/configs/.env` and add variables into the file. Note that the file is ignored by git.
+# Environment Variables
+To add environment variables, create `/pkg/configs/.env` and add variables into the file. Note that the file is ignored by git.
 
 For example
 ```
