@@ -26,6 +26,8 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user.DouyinUserResponse)
 
+	//TODO: get current user id and determine if the
+	//target user is followed by current user
 	if _, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
