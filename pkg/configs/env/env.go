@@ -6,7 +6,7 @@ import (
 )
 
 func LoadEnv() {
-	err := godotenv.Load("pkg/configs/env/.env", "pkg/configs/env/.secret")
+	err := godotenv.Load(".env", ".secrets")
 
 	if err != nil {
 		hlog.Error("Failed to load env files, shutting down...")

@@ -63,11 +63,9 @@ hz update -idl idl/hello.thrift
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
 
 # Environment Variables
-To add environment variables and secrets, create `/pkg/configs/env/.env` and `/pkg/configs/env/.secret`.
+Environment variables and secrets are stored in `.env` and `.secrets`.
 
-`.env` holds environment variables and `.secret` holds secrets like JWT keys.
-
-For example
+To add variables:
 ```
 MY_ENV_VAR=THIS_IS_AN_ENV_VAR
 JWT_SECRET=THIS_IS_A_SECRET
