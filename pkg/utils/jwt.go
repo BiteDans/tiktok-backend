@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"os"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -18,23 +19,23 @@ func GenerateJWT(userid uint) (string, error) {
 	return tokenString, err
 }
 
-// returns user_id in the payload, 0 if error
-func ValidateJWT(token string) uint {
+// returns user_id that is stored in the payload
+func GetIdFromToken(token string) (uint, error) {
 	parsed, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return key, nil
 	})
 
 	if err != nil || !parsed.Valid {
 		// token not valid
-		return 0
+		return 0, errors.New("invalid token")
 	}
 
 	claims, ok := parsed.Claims.(jwt.MapClaims)
 
 	if !ok {
 		// fail to extract claims
-		return 0
+		return 0, errors.New("failed to extract claims from payload")
 	}
 
-	return uint(claims["user_id"].(float64))
+	return uint(claims["user_id"].(float64)), nil
 }

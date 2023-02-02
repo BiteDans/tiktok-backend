@@ -26,7 +26,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user.DouyinUserResponse)
 
-	if cur_user_id := utils.ValidateJWT(req.Token); cur_user_id == 0 {
+	if _, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.User = nil
