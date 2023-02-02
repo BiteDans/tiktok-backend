@@ -1,4 +1,4 @@
-namespace go douyin.core
+namespace go douyin.core.user
 
 struct User {
     1: i64 id

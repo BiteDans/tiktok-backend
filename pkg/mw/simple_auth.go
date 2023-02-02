@@ -3,7 +3,7 @@ package mw
 import (
 	"context"
 
-	core "BiteDans.com/tiktok-backend/biz/model/douyin/core"
+	user "BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/errors"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -12,7 +12,7 @@ import (
 func AuthMiddleware() app.HandlerFunc {
 	return func(ctx context.Context, c *app.RequestContext) {
 		var err error
-		var req core.DouyinUserRequest
+		var req user.DouyinUserRequest
 		err = c.BindAndValidate(&req)
 		if err != nil {
 			c.String(consts.StatusBadRequest, err.Error())
