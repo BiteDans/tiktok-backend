@@ -919,7 +919,7 @@ func (p *DouyinVideoPublishResponse) String() string {
 }
 
 type DouyinVideoPublishListRequest struct {
-	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id"`
+	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id" query:"user_id"`
 	Token  string `thrift:"token,2" form:"token" json:"token" query:"token"`
 }
 
