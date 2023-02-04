@@ -139,7 +139,6 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	for i := 0; i < len(idList); i++ {
 		user := new(follow.User)
 		if err := model.GetFollowInfoByIDs(curUserId, idList[i], user); err != nil {
-			resp.StatusCode = -1
 			resp.StatusMsg = "wrong"
 			return
 		}
