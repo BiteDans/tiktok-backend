@@ -48,7 +48,10 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp_user := &user.User{}
-	if err = model.GetFollowInfoByIDs(curUserId, uint(req.UserId), resp_user); err != nil {
+	var isFollow bool
+
+	isFollow, err = model.GetFollowRelation(curUserId, uint(req.UserId))
+	if err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to retrieve user info"
 		resp.User = nil
@@ -57,6 +60,12 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		hlog.Errorf("Failed to retrieve user info: %v", err)
 		return
 	}
+
+	resp_user.ID = int64(_user.ID)
+	resp_user.Name = _user.Username
+	resp_user.FollowCount = model.GetFollowCount(_user)
+	resp_user.FollowerCount = model.GetFollowerCount(_user)
+	resp_user.IsFollow = isFollow
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
