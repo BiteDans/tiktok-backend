@@ -58,7 +58,3 @@ func UserFollowAction(uc *User, ut *User, t uint) error {
 	}
 	return dal.DB.Model(uc).Association("Followings").Delete(ut)
 }
-
-func GetFollowListByUser(uList *[]*User, user *User) error {
-	return dal.DB.Model(user).Association("Followings").Find(&uList)
-}
