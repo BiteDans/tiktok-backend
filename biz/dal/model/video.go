@@ -34,6 +34,7 @@ func CreateVideo(v *Video) error {
 }
 
 func GetVideoCount() (int, error) {
-	result := dal.DB.Find(&Video{})
-	return int(result.RowsAffected), result.Error
+	var totalRows int64
+	err := dal.DB.Model(Video{}).Count(&totalRows).Error
+	return int(totalRows), err
 }

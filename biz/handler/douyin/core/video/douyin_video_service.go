@@ -56,7 +56,6 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	userId, err := utils.GetIdFromToken(req.Token)
 	if err != nil {
 		resp.StatusMsg = "Invalid token"
-
 		c.JSON(consts.StatusUnauthorized, resp)
 		return
 	}
@@ -73,10 +72,20 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	ext := filepath.Ext(file.Filename)
 
 	// unique video name: number of total videos + 1.ext
-	filename := strconv.Itoa(totalRows + 1) + ext
+	filename := strconv.Itoa(totalRows + 1)
+	fullFilename := filename + ext
+	fullImagename := filename + ".png"
+
 	_ = os.Mkdir("./files", 0755)
-	c.SaveUploadedFile(file, "./files/" + filename)
-	uploadFile, _ := os.Open("./files/" + filename)
+	c.SaveUploadedFile(file, "./files/" + fullFilename)
+
+	_, err = utils.GetSnapshot("./files/" + fullFilename, "./files/" + filename, 1)
+
+	if err != nil {
+		hlog.Errorf("Failed to create snapshot image: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
 	
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(constants.REGION)},
@@ -88,29 +97,57 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
-	output, err := uploader.Upload(&s3manager.UploadInput{
+	
+	uploadFile, _ := os.Open("./files/" + fullFilename)
+	uploadImageFile, _ := os.Open("./files/" + fullImagename)
+
+	videoOutput, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(constants.BUCKET_NAME),
-		Key: aws.String(filename),
+		Key: aws.String(fullFilename),
 		Body: uploadFile,
 	})
 	if err != nil {
+		uploadFile.Close()
+		uploadImageFile.Close()
 		hlog.Errorf("Unable to upload video to AWS with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
+	coverOutput, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(constants.BUCKET_NAME),
+		Key: aws.String(fullImagename),
+		Body: uploadImageFile,
+	})
+	if err != nil {
+		uploadFile.Close()
+		uploadImageFile.Close()
+		hlog.Errorf("Unable to upload image to AWS with error: %s", err.Error())
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
 	
 	uploadFile.Close()
+	uploadImageFile.Close()
 
-	err = os.Remove("./files/" + filename)
+	err = os.Remove("./files/" + fullFilename)
 	if err != nil {
-		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", filename, err.Error())
+		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", fullFilename, err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = os.Remove("./files/" + fullImagename)
+	if err != nil {
+		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", fullImagename, err.Error())
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
 
 	_video := new(model.Video)
 	_video.AuthorId = int64(userId)
-	_video.PlayUrl = output.Location
+	_video.PlayUrl = videoOutput.Location
+	_video.CoverUrl = coverOutput.Location
 	_video.Title = req.Title
 	err = model.CreateVideo(_video)
 	if err != nil {
