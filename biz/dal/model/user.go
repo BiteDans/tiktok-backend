@@ -13,11 +13,6 @@ type User struct {
 	Followers  []*User `gorm:"many2many:follow_relations;joinForeignKey:follow_id;JoinReferences:user_id"`
 }
 
-type FollowRelation struct {
-	UserId   uint `column:"user_id"`
-	FollowId uint `column:"follow_id"`
-}
-
 func (u *User) TableName() string {
 	return "users"
 }
