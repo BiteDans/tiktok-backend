@@ -6,12 +6,14 @@ replace github.com/apache/thrift => github.com/apache/thrift v0.13.0
 
 require (
 	github.com/apache/thrift v0.0.0-00010101000000-000000000000
+	github.com/aws/aws-sdk-go v1.44.194
 	github.com/cloudwego/hertz v0.5.1
 	github.com/golang-jwt/jwt/v4 v4.4.3
 	github.com/joho/godotenv v1.4.0
 )
 
 require (
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/stretchr/testify v1.7.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
@@ -36,7 +38,7 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.0.0-20210923205945-b76863e36670 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/sys v0.1.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gorm.io/driver/mysql v1.4.5
 	gorm.io/gorm v1.24.3

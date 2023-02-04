@@ -3,13 +3,22 @@
 package video
 
 import (
+	"context"
+	"path/filepath"
+	"strconv"
+
+	"os"
+
 	"BiteDans.com/tiktok-backend/biz/dal"
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/video"
 	"BiteDans.com/tiktok-backend/pkg/utils"
-	"context"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
@@ -34,14 +43,83 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req video.DouyinVideoPublishRequest
+	resp := new(video.DouyinVideoPublishResponse)
+	
 	err = c.BindAndValidate(&req)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
 
-	resp := new(video.DouyinVideoPublishResponse)
+	userId, err := utils.GetIdFromToken(req.Token)
+	if err != nil {
+		resp.StatusMsg = "Invalid token"
 
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	totalRows, err := model.GetVideoCount()
+	if err != nil {
+		hlog.Errorf("Failed to get the row count of videos with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
+	form, _ := c.MultipartForm()
+	file := form.File["data"][0]
+	ext := filepath.Ext(file.Filename)
+
+	// unique video name: number of total videos + 1.ext
+	filename := strconv.Itoa(totalRows + 1) + ext
+	_ = os.Mkdir("./files", 0755)
+	c.SaveUploadedFile(file, "./files/" + filename)
+	uploadFile, _ := os.Open("./files/" + filename)
+	
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String("us-west-1")},
+	)
+	uploader := s3manager.NewUploader(sess)
+
+	if err != nil {
+		hlog.Errorf("Unable to connect to AWS for the following error: " + err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+	output, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String("tiktok-bitedans"),
+		Key: aws.String(filename),
+		Body: uploadFile,
+	})
+	if err != nil {
+		hlog.Errorf("Unable to upload video to AWS with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+	
+	uploadFile.Close()
+
+	err = os.Remove("./files/" + filename)
+	if err != nil {
+		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", filename, err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_video := new(model.Video)
+	_video.AuthorId = int64(userId)
+	_video.PlayUrl = output.Location
+	_video.Title = req.Title
+	err = model.CreateVideo(_video)
+	if err != nil {
+		hlog.Errorf("Failed to save new video to the database with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Video published successfully"
 	c.JSON(consts.StatusOK, resp)
 }
 

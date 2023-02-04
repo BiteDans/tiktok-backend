@@ -487,8 +487,7 @@ func (p *DouyinVideoFeedResponse) String() string {
 
 type DouyinVideoPublishRequest struct {
 	Token string `thrift:"token,1" form:"token" json:"token" query:"token"`
-	Data  []int8 `thrift:"data,2" form:"data" json:"data" query:"data"`
-	Title string `thrift:"title,3" form:"title" json:"title" query:"title"`
+	Title string `thrift:"title,2" form:"title" json:"title" query:"title"`
 }
 
 func NewDouyinVideoPublishRequest() *DouyinVideoPublishRequest {
@@ -499,18 +498,13 @@ func (p *DouyinVideoPublishRequest) GetToken() (v string) {
 	return p.Token
 }
 
-func (p *DouyinVideoPublishRequest) GetData() (v []int8) {
-	return p.Data
-}
-
 func (p *DouyinVideoPublishRequest) GetTitle() (v string) {
 	return p.Title
 }
 
 var fieldIDToName_DouyinVideoPublishRequest = map[int16]string{
 	1: "token",
-	2: "data",
-	3: "title",
+	2: "title",
 }
 
 func (p *DouyinVideoPublishRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -543,18 +537,8 @@ func (p *DouyinVideoPublishRequest) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 2:
-			if fieldTypeId == thrift.LIST {
-				if err = p.ReadField2(iprot); err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				if err = iprot.Skip(fieldTypeId); err != nil {
-					goto SkipFieldError
-				}
-			}
-		case 3:
 			if fieldTypeId == thrift.STRING {
-				if err = p.ReadField3(iprot); err != nil {
+				if err = p.ReadField2(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -602,28 +586,6 @@ func (p *DouyinVideoPublishRequest) ReadField1(iprot thrift.TProtocol) error {
 }
 
 func (p *DouyinVideoPublishRequest) ReadField2(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
-		return err
-	}
-	p.Data = make([]int8, 0, size)
-	for i := 0; i < size; i++ {
-		var _elem int8
-		if v, err := iprot.ReadByte(); err != nil {
-			return err
-		} else {
-			_elem = v
-		}
-
-		p.Data = append(p.Data, _elem)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (p *DouyinVideoPublishRequest) ReadField3(iprot thrift.TProtocol) error {
 	if v, err := iprot.ReadString(); err != nil {
 		return err
 	} else {
@@ -644,10 +606,6 @@ func (p *DouyinVideoPublishRequest) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
-			goto WriteFieldError
-		}
-		if err = p.writeField3(oprot); err != nil {
-			fieldId = 3
 			goto WriteFieldError
 		}
 
@@ -687,32 +645,7 @@ WriteFieldEndError:
 }
 
 func (p *DouyinVideoPublishRequest) writeField2(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("data", thrift.LIST, 2); err != nil {
-		goto WriteFieldBeginError
-	}
-	if err := oprot.WriteListBegin(thrift.BYTE, len(p.Data)); err != nil {
-		return err
-	}
-	for _, v := range p.Data {
-		if err := oprot.WriteByte(v); err != nil {
-			return err
-		}
-	}
-	if err := oprot.WriteListEnd(); err != nil {
-		return err
-	}
-	if err = oprot.WriteFieldEnd(); err != nil {
-		goto WriteFieldEndError
-	}
-	return nil
-WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
-WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
-}
-
-func (p *DouyinVideoPublishRequest) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("title", thrift.STRING, 3); err != nil {
+	if err = oprot.WriteFieldBegin("title", thrift.STRING, 2); err != nil {
 		goto WriteFieldBeginError
 	}
 	if err := oprot.WriteString(p.Title); err != nil {
@@ -723,9 +656,9 @@ func (p *DouyinVideoPublishRequest) writeField3(oprot thrift.TProtocol) (err err
 	}
 	return nil
 WriteFieldBeginError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
-	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
+	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
 }
 
 func (p *DouyinVideoPublishRequest) String() string {
@@ -919,7 +852,7 @@ func (p *DouyinVideoPublishResponse) String() string {
 }
 
 type DouyinVideoPublishListRequest struct {
-	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id" query:"user_id"`
+	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id"`
 	Token  string `thrift:"token,2" form:"token" json:"token" query:"token"`
 }
 

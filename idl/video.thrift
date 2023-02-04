@@ -14,8 +14,7 @@ struct douyinVideoFeedResponse {
 
 struct douyinVideoPublishRequest {
     1: string  token
-    2: list<byte>  data
-    3: string  title
+    2: string  title
 }
 
 struct douyinVideoPublishResponse {

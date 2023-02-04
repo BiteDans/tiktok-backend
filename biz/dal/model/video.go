@@ -32,3 +32,8 @@ func FindVideosByUserId(v []*Video, id int64) error {
 func CreateVideo(v *Video) error {
 	return dal.DB.Create(v).Error
 }
+
+func GetVideoCount() (int, error) {
+	result := dal.DB.Find(&Video{})
+	return int(result.RowsAffected), result.Error
+}
