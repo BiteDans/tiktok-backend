@@ -13,6 +13,7 @@ import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/video"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -78,7 +79,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	uploadFile, _ := os.Open("./files/" + filename)
 	
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-west-1")},
+		Region: aws.String(constants.REGION)},
 	)
 	uploader := s3manager.NewUploader(sess)
 
@@ -88,7 +89,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	output, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String("tiktok-bitedans"),
+		Bucket: aws.String(constants.BUCKET_NAME),
 		Key: aws.String(filename),
 		Body: uploadFile,
 	})
