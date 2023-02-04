@@ -50,9 +50,11 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	resp_user := &user.User{}
 	if err = model.GetFollowInfoByIDs(curUserId, uint(req.UserId), resp_user); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to reach user info"
+		resp.StatusMsg = "Failed to retrieve user info"
 		resp.User = nil
 		c.JSON(consts.StatusInternalServerError, resp)
+
+		hlog.Errorf("Failed to retrieve user info: %v", err)
 		return
 	}
 
@@ -103,7 +105,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to log in (Token generation failed)"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to generate token")
+		hlog.Errorf("Failed to generate token: %v", err)
 		return
 	}
 
@@ -144,7 +146,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to register user"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to create user into database")
+		hlog.Errorf("Failed to create user into database: %v", err)
 		return
 	}
 
@@ -155,7 +157,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to log in (Token generation failed)"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to generate token")
+		hlog.Errorf("Failed to generate token: %v", err)
 		return
 	}
 
