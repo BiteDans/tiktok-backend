@@ -13,11 +13,7 @@ import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/video"
-	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -86,68 +82,28 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
-	
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String(constants.REGION)},
-	)
-	uploader := s3manager.NewUploader(sess)
 
+	videoOutput, err := utils.UploadFile(fullFilename)
 	if err != nil {
-		hlog.Errorf("Unable to connect to AWS for the following error: " + err.Error())
-		c.String(consts.StatusInternalServerError, err.Error())
-		return
-	}
-	
-	uploadFile, _ := os.Open("./files/" + fullFilename)
-	uploadImageFile, _ := os.Open("./files/" + fullImagename)
-
-	videoOutput, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(constants.BUCKET_NAME),
-		Key: aws.String(fullFilename),
-		Body: uploadFile,
-	})
-	if err != nil {
-		uploadFile.Close()
-		uploadImageFile.Close()
 		hlog.Errorf("Unable to upload video to AWS with error: %s", err.Error())
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
 
-	coverOutput, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(constants.BUCKET_NAME),
-		Key: aws.String(fullImagename),
-		Body: uploadImageFile,
-	})
+	coverOutput, err := utils.UploadFile(fullImagename)
 	if err != nil {
-		uploadFile.Close()
-		uploadImageFile.Close()
 		hlog.Errorf("Unable to upload image to AWS with error: %s", err.Error())
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
-	
-	uploadFile.Close()
-	uploadImageFile.Close()
 
-	err = os.Remove("./files/" + fullFilename)
-	if err != nil {
-		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", fullFilename, err.Error())
-		c.String(consts.StatusInternalServerError, err.Error())
-		return
-	}
-
-	err = os.Remove("./files/" + fullImagename)
-	if err != nil {
-		hlog.Errorf("Failed to delete file: ./file/upload/%s with error: %s", fullImagename, err.Error())
-		c.String(consts.StatusInternalServerError, err.Error())
-		return
-	}
+	_ = os.Remove("./files/" + fullFilename)
+	_ = os.Remove("./files/" + fullImagename)
 
 	_video := new(model.Video)
 	_video.AuthorId = int64(userId)
-	_video.PlayUrl = videoOutput.Location
-	_video.CoverUrl = coverOutput.Location
+	_video.PlayUrl = videoOutput
+	_video.CoverUrl = coverOutput
 	_video.Title = req.Title
 	err = model.CreateVideo(_video)
 	if err != nil {
