@@ -4,6 +4,7 @@ package follow
 
 import (
 	"context"
+	"fmt"
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/utils"
@@ -74,8 +75,37 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	resp := new(follow.DouyinRelationFollowerListResponse)
+	curUserReq := req.Token
+	curUserId, err1 := utils.GetIdFromToken(curUserReq)
+	if err1 != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	toUserId := req.UserId
+
+	var idList []uint
+	curUser := new(model.User)
+	model.FindUserById(curUser, uint(toUserId))
+	idList, _ = model.GetFollowersId(curUser)
+
+	fmt.Println(idList)
+	var followerList []*follow.User
+	for i := 0; i < len(idList); i++ {
+		user := new(follow.User)
+		if err := model.GetFollowInfoByIDs(curUserId, idList[i], user); err != nil {
+			resp.StatusMsg = "wrong"
+			return
+		}
+		followerList = append(followerList, user)
+	}
+
+	fmt.Println(followerList)
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Get follower list successfully"
+	resp.UserList = followerList
 
 	c.JSON(consts.StatusOK, resp)
 }
