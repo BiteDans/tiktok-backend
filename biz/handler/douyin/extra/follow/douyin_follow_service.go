@@ -96,14 +96,11 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	var respList []*follow.User
 	for _, u := range uList {
 		userResp := new(follow.User)
-		if err := model.GetFollowInfoByIDs(curUserId, u.ID, userResp); err != nil {
-			resp.StatusMsg = "wrong"
-			return
-		}
+		GetUserInfo(userResp, u, curUserId)
 		respList = append(respList, userResp)
 	}
 	resp.StatusCode = 0
-	resp.StatusMsg = "FollowList retrieved successfully"
+	resp.StatusMsg = "User info retrieved successfully"
 	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
@@ -153,4 +150,16 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 
 	c.JSON(consts.StatusOK, resp)
 
+}
+
+func GetUserInfo(followUser *follow.User, modelUser *model.User, curUserId uint) error {
+	var err error
+	followUser.ID = int64(modelUser.ID)
+	followUser.Name = modelUser.Username
+	if followUser.IsFollow, err = model.GetFollowRelation(curUserId, modelUser.ID); err != nil {
+		return err
+	}
+	followUser.FollowCount = model.GetFollowCount(modelUser)
+	followUser.FollowerCount = model.GetFollowerCount(modelUser)
+	return nil
 }
