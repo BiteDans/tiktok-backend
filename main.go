@@ -27,7 +27,6 @@ func main() {
 
 	// init database
 	dal.Init()
-	dal.DB.SetupJoinTable(&model.User{}, "Followings", &model.FollowRelation{})
 	dal.DB.AutoMigrate(&model.User{})
 	dal.DB.AutoMigrate(&model.Video{})
 
