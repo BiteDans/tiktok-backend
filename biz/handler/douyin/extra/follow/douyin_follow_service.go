@@ -60,6 +60,47 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(follow.DouyinRelationFollowListResponse)
+	/* get curUserId */
+	var curUserId uint
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.UserList = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	/* get target User */
+	_user := new(model.User)
+	targetUserId := uint(req.UserId)
+	if err = model.FindUserById(_user, targetUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	var uList []*model.User
+
+	if err = model.GetFollowListByUser(&uList, _user); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "DB Find error"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	var respList []*follow.User
+	for _, u := range uList {
+		userResp := new(follow.User)
+		GetUserInfo(userResp, u, curUserId)
+		respList = append(respList, userResp)
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "User info retrieved successfully"
+	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -78,4 +119,17 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	resp := new(follow.DouyinRelationFollowerListResponse)
 
 	c.JSON(consts.StatusOK, resp)
+
+}
+
+func GetUserInfo(followUser *follow.User, modelUser *model.User, curUserId uint) error {
+	var err error
+	followUser.ID = int64(modelUser.ID)
+	followUser.Name = modelUser.Username
+	if followUser.IsFollow, err = model.GetFollowRelation(curUserId, modelUser.ID); err != nil {
+		return err
+	}
+	followUser.FollowCount = model.GetFollowCount(modelUser)
+	followUser.FollowerCount = model.GetFollowerCount(modelUser)
+	return nil
 }
