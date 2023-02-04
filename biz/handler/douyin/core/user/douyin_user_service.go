@@ -26,9 +26,9 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user.DouyinUserResponse)
 
-	//TODO: get current user id and determine if the
-	//target user is followed by current user
-	if _, err = utils.GetIdFromToken(req.Token); err != nil {
+	var curUserId uint
+
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.User = nil
@@ -47,15 +47,18 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	resp_user := &user.User{}
+	if err = model.GetFollowInfoByIDs(curUserId, uint(req.UserId), resp_user); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to reach user info"
+		resp.User = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		return
+	}
+
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
-	resp.User = &user.User{
-		ID:            int64(_user.ID),
-		Name:          _user.Username,
-		FollowCount:   123,
-		FollowerCount: 456,
-		IsFollow:      true,
-	}
+	resp.User = resp_user
 
 	c.JSON(consts.StatusOK, resp)
 }
