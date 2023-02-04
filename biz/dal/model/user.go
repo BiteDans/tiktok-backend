@@ -28,3 +28,10 @@ func FindUserByUsername(u *User, username string) error {
 func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
 }
+
+func UserFollowAction(uc *User, ut *User, t uint) error {
+	if t == 1 {
+		return dal.DB.Model(uc).Association("Followings").Append(ut)
+	}
+	return dal.DB.Model(uc).Association("Followings").Delete(ut)
+}

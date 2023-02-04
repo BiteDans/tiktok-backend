@@ -3,9 +3,12 @@
 package follow
 
 import (
+	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/pkg/utils"
 	"context"
 
 	follow "BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
+	_ "BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
@@ -22,6 +25,25 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(follow.DouyinRelationActionResponse)
+	curUserReq := req.Token
+	curUserId, err1 := utils.GetIdFromToken(curUserReq)
+	if err1 != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+	curUser := new(model.User)
+	if err := model.FindUserById(curUser, curUserId); err != nil {
+		return
+	}
+	toUserId := req.ToUserId
+	toUser := new(model.User)
+	if err := model.FindUserById(toUser, uint(toUserId)); err != nil {
+		return
+	}
+	actionType := req.ActionType
+	if err := model.UserFollowAction(curUser, toUser, uint(actionType)); err != nil {
+		return
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
