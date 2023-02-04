@@ -33,7 +33,7 @@ CREATE TABLE `message`
     `id`         bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'PK',
     `to_user_id`   bigint unsigned NOT NULL COMMENT 'Receiver id',
     `from_user_id`   bigint unsigned NOT NULL COMMENT 'Sender id',
-    'content' varchar(256) NOT NULL DEFAULT '' COMMENT 'Message content',
+    `content` varchar(256) NOT NULL DEFAULT '' COMMENT 'Message content',
     `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Message create time',
     `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'Message update time',
     `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'Message delete time',
