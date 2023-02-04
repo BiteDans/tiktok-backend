@@ -9,8 +9,13 @@ type User struct {
 	gorm.Model
 	Username   string  `json:"username" column:"username"`
 	Password   string  `json:"password" column:"password"`
-	Followings []*User `gorm:"many2many:follow_relation;joinForeignKey:user_Id;JoinReferences:following_id"`
-	Followers  []*User `gorm:"many2many:follow_relation;joinForeignKey:following_id;JoinReferences:user_Id"`
+	Followings []*User `gorm:"many2many:follow_relations;joinForeignKey:user_id;JoinReferences:follow_id"`
+	Followers  []*User `gorm:"many2many:follow_relations;joinForeignKey:follow_id;JoinReferences:user_id"`
+}
+
+type FollowRelation struct {
+	UserId   uint `column:"user_id"`
+	FollowId uint `column:"follow_id"`
 }
 
 func (u *User) TableName() string {
