@@ -2,6 +2,7 @@ package model
 
 import (
 	"BiteDans.com/tiktok-backend/biz/dal"
+	"BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
 	"gorm.io/gorm"
 )
 
@@ -27,6 +28,45 @@ func FindUserByUsername(u *User, username string) error {
 
 func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
+}
+
+func GetFollowersId(u *User) ([]uint, error) {
+	var result []*User
+	var idList []uint
+	err := dal.DB.Model(&u).Association("Followers").Find(&result)
+	for i := 0; i < len(result); i++ {
+		idList = append(idList, result[i].ID)
+	}
+	if err != nil {
+		return nil, err
+	}
+	return idList, err
+}
+
+func GetFollowInfoByIDs(from_user_id uint, to_user_id uint, user_resp *follow.User) error {
+	from_user := User{}
+	to_user := User{}
+
+	var err error
+
+	err = FindUserById(&from_user, from_user_id)
+	if err != nil {
+		return err
+	}
+
+	err = FindUserById(&to_user, to_user_id)
+	if err != nil {
+		return err
+	}
+
+	user_resp.ID = int64(to_user.ID)
+	user_resp.Name = to_user.Username
+	user_resp.FollowCount = GetFollowCount(&to_user)
+	user_resp.FollowerCount = GetFollowerCount(&to_user)
+	isFollow, _ := GetFollowRelation(from_user_id, to_user_id)
+	user_resp.IsFollow = isFollow
+
+	return nil
 }
 
 func GetFollowRelation(from_user_id uint, to_user_id uint) (bool, error) {
