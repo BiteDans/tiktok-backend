@@ -7,8 +7,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Username string `json:"username" column:"username"`
-	Password string `json:"password" column:"password"`
+	Username   string  `json:"username" column:"username"`
+	Password   string  `json:"password" column:"password"`
+	Followings []*User `gorm:"many2many:follow_relation;joinForeignKey:user_Id;JoinReferences:following_id"`
+	Followers  []*User `gorm:"many2many:follow_relation;joinForeignKey:following_id;JoinReferences:user_Id"`
 }
 
 func (u *User) TableName() string {
