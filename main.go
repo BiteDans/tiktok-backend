@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"BiteDans.com/tiktok-backend/biz/dal"
+	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/configs/env"
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -26,6 +27,7 @@ func main() {
 
 	// init database
 	dal.Init()
+	dal.DB.AutoMigrate(&model.User{})
 
 	// load .env
 	env.LoadEnv()
