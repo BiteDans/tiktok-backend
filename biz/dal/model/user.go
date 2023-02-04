@@ -19,7 +19,7 @@ type FollowRelation struct {
 }
 
 func (u *User) TableName() string {
-	return "user"
+	return "users"
 }
 
 func FindUserById(u *User, id uint) error {

@@ -3,12 +3,12 @@
 package follow
 
 import (
-	"BiteDans.com/tiktok-backend/biz/dal/model"
-	"BiteDans.com/tiktok-backend/pkg/utils"
 	"context"
 
+	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/pkg/utils"
+
 	follow "BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
-	_ "BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
