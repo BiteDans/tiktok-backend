@@ -3,7 +3,10 @@
 package interaction
 
 import (
+	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/pkg/utils"
 	"context"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	interaction "BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -54,6 +57,60 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(interaction.DouyinCommentActionResponse)
+
+	var user_id uint
+	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.Comment = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	_user := new(model.User)
+	if err = model.FindUserById(_user, user_id); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.Comment = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	_video := new(model.Video)
+	if err = model.FindVideoById(_video, uint(req.VideoId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Video id does not exist"
+		resp.Comment = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	if req.ActionType == 1 {
+		comment := new(model.Comment)
+		comment.UserId = int64(user_id)
+		comment.VideoId = req.VideoId
+		comment.Content = req.CommentText
+		if err = model.CreateComment(comment); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to create comment"
+			resp.Comment = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+
+			hlog.Error("Failed to create comment into database")
+			return
+		}
+		resp.StatusCode = 0
+		resp.StatusMsg = "comment on video successfully!"
+		resp.Comment = &interaction.Comment{
+			ID:         0,
+			User:       nil,
+			Content:    comment.Content,
+			CreateDate: comment.CreatedAt.String(),
+		}
+	} else if req.ActionType == 2 {
+		
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
