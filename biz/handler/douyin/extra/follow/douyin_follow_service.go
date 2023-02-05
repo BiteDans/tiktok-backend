@@ -3,10 +3,9 @@
 package follow
 
 import (
-	"context"
-
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/utils"
+	"context"
 
 	follow "BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -31,18 +30,20 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+
 	curUser := new(model.User)
-	if err := model.FindUserById(curUser, curUserId); err != nil {
-		return
-	}
-	toUserId := req.ToUserId
 	toUser := new(model.User)
-	if err := model.FindUserById(toUser, uint(toUserId)); err != nil {
+
+	actionType := req.ActionType
+	if err := model.CreateFollowRecord(curUser, toUser, curUserId, uint(req.ToUserId), uint(actionType)); err != nil {
 		return
 	}
-	actionType := req.ActionType
-	if err := model.UserFollowAction(curUser, toUser, uint(actionType)); err != nil {
-		return
+
+	resp.StatusCode = 0
+	if actionType == 1 {
+		resp.StatusMsg = "Followed Successful"
+	} else {
+		resp.StatusMsg = "UnFollowed Successful"
 	}
 
 	c.JSON(consts.StatusOK, resp)
@@ -74,8 +75,34 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
-
 	resp := new(follow.DouyinRelationFollowerListResponse)
+	curUserReq := req.Token
+	curUserId, err1 := utils.GetIdFromToken(curUserReq)
+	if err1 != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
+	}
+
+	toUserId := req.UserId
+
+	var idList []uint
+	curUser := new(model.User)
+	model.FindUserById(curUser, uint(toUserId))
+	idList, _ = model.GetFollowersId(curUser)
+
+	var followerList []*follow.User
+	for i := 0; i < len(idList); i++ {
+		user := new(follow.User)
+		if err := model.GetFollowInfoByIDs(curUserId, idList[i], user); err != nil {
+			resp.StatusMsg = "wrong"
+			return
+		}
+		followerList = append(followerList, user)
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Get follower list successfully"
+	resp.UserList = followerList
 
 	c.JSON(consts.StatusOK, resp)
 }
