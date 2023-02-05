@@ -4,7 +4,17 @@ Tiktok-backend is the backend module for Bytedance Bootcamp Tiktok project. We u
 
 # Running the project
 
-To run the project, we first run the following command to fetch the dependencies:
+Before running the project, make sure you have done the following steps:
+
+1. Download ffmpeg at https://ffbinaries.com/downloads.
+2. At ~/.aws, create a file named credentials, and type in
+
+<code>
+aws_access_key_id = ***
+aws_secret_access_key = ***
+</code>
+
+Then, to run the project, we first run the following command to fetch the dependencies:
 
 ```console
 go mod tidy
@@ -63,15 +73,18 @@ hz update -idl idl/hello.thrift
 For more details, refer to [hz's official documents](https://www.cloudwego.io/zh/docs/hertz/tutorials/toolkit/toolkit/).
 
 # Environment Variables
+
 Environment variables and secrets are stored in `.env` and `.secrets`.
 
 To add variables:
+
 ```
 MY_ENV_VAR=THIS_IS_AN_ENV_VAR
 JWT_SECRET=THIS_IS_A_SECRET
 ```
 
 To get env variables, use `os.Getenv("SECRET_NAME")`, for example
+
 ```go
 var key = os.Getenv("JWT_SECRET") // returns "THIS_IS_A_SECRET"
 ```
