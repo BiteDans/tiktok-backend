@@ -3,7 +3,6 @@
 package router
 
 import (
-	douyin_core_interaction "BiteDans.com/tiktok-backend/biz/router/douyin/core/interaction"
 	douyin_core_user "BiteDans.com/tiktok-backend/biz/router/douyin/core/user"
 	douyin_core_video "BiteDans.com/tiktok-backend/biz/router/douyin/core/video"
 	douyin_extra_follow "BiteDans.com/tiktok-backend/biz/router/douyin/extra/follow"
