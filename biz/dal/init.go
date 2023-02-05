@@ -5,7 +5,6 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
@@ -17,7 +16,6 @@ func Init() {
 		&gorm.Config{
 			SkipDefaultTransaction: true,
 			PrepareStmt:            true,
-			Logger:                 logger.Default.LogMode(logger.Info),
 		},
 	)
 

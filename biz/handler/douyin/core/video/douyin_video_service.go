@@ -25,17 +25,17 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 	// var err error
 	var req video.DouyinVideoFeedRequest
 	_ = c.Bind(&req)
-	
+
 	resp := new(video.DouyinVideoFeedResponse)
 
-	now := time.Now() 
+	now := time.Now()
 	latestTime := req.LatestTime
-	
+
 	if latestTime == 0 {
 		latestTime = now.UnixMilli()
 	}
 	unixTime := time.UnixMilli(latestTime)
-	
+
 	videos, err := model.FindLatestVideos(unixTime)
 	if err != nil {
 		resp.StatusCode = -1
@@ -46,19 +46,36 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	var curUserId uint
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.VideoList = nil
+		resp.NextTime = 0
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
 	resp.StatusCode = 0
 	resp.StatusMsg = "Publishing list info retrieved successfully"
 	resp.VideoList = []*video.Video{}
 	resp.NextTime = now.UnixMilli()
 
 	for _, _video := range videos {
+		author := new(model.User)
+		author.ID = uint(_video.AuthorId)
+
+		isFollow, _ := model.GetFollowRelation(curUserId, uint(_video.AuthorId))
+
 		the_user := &user.User{
 			ID:            int64(_video.AuthorId),
 			Name:          _video.AuthorUsername,
-			FollowCount:   123,
-			FollowerCount: 456,
-			IsFollow:      true,
+			FollowCount:   model.GetFollowCount(author),
+			FollowerCount: model.GetFollowerCount(author),
+			IsFollow:      isFollow,
 		}
+
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(the_user),
