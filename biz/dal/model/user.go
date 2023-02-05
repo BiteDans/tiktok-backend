@@ -30,42 +30,15 @@ func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
 }
 
-func GetFollowersId(u *User) ([]uint, error) {
-	var result []*User
-	var idList []uint
-	err := dal.DB.Model(&u).Association("Followers").Find(&result)
-	for i := 0; i < len(result); i++ {
-		idList = append(idList, result[i].ID)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return idList, err
-}
-
-func GetFollowInfoByIDs(from_user_id uint, to_user_id uint, user_resp *follow.User) error {
-	from_user := User{}
-	to_user := User{}
-
+func GetFollowInfoByUsers(from_user *User, to_user *User, user_resp *follow.User) error {
 	var err error
-
-	err = FindUserById(&from_user, from_user_id)
-	if err != nil {
-		return err
-	}
-
-	err = FindUserById(&to_user, to_user_id)
-	if err != nil {
-		return err
-	}
-
 	user_resp.ID = int64(to_user.ID)
 	user_resp.Name = to_user.Username
-	user_resp.FollowCount = GetFollowCount(&to_user)
-	user_resp.FollowerCount = GetFollowerCount(&to_user)
-	isFollow, _ := GetFollowRelation(from_user_id, to_user_id)
-	user_resp.IsFollow = isFollow
-
+	user_resp.FollowCount = GetFollowCount(to_user)
+	user_resp.FollowerCount = GetFollowerCount(to_user)
+	if user_resp.IsFollow, err = GetFollowRelation(from_user.ID, to_user.ID); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -105,4 +78,12 @@ func CreateFollowRecord(uc *User, ut *User, ucId uint, utId uint, t uint) error 
 		return dal.DB.Model(uc).Association("Followings").Append(ut)
 	}
 	return dal.DB.Model(uc).Association("Followings").Delete(ut)
+}
+
+func GetFollowListByUser(uList *[]*User, user *User) error {
+	return dal.DB.Model(user).Association("Followings").Find(&uList)
+}
+
+func GetFollowerListByUser(uList *[]*User, user *User) error {
+	return dal.DB.Model(user).Association("Followers").Find(&uList)
 }
