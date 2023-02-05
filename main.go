@@ -13,7 +13,9 @@ import (
 )
 
 func main() {
-	h := server.Default()
+	h := server.New(
+		server.WithMaxRequestBodySize(64 * 1024 * 1024),
+	)
 
 	//set up logger
 	f, err := os.OpenFile("./output.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
