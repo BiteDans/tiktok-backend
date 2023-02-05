@@ -8,6 +8,7 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/utils"
+	"context"
 
 	follow "BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -32,18 +33,28 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
+
 	curUser := new(model.User)
+	toUser := new(model.User)
+
 	if err := model.FindUserById(curUser, curUserId); err != nil {
 		return
 	}
-	toUserId := req.ToUserId
-	toUser := new(model.User)
-	if err := model.FindUserById(toUser, uint(toUserId)); err != nil {
+
+	if err := model.FindUserById(toUser, uint(req.ToUserId)); err != nil {
 		return
 	}
+
 	actionType := req.ActionType
-	if err := model.UserFollowAction(curUser, toUser, uint(actionType)); err != nil {
+	if err := model.CreateFollowRecord(curUser, toUser, uint(actionType)); err != nil {
 		return
+	}
+
+	resp.StatusCode = 0
+	if actionType == 1 {
+		resp.StatusMsg = "Followed Successful"
+	} else {
+		resp.StatusMsg = "UnFollowed Successful"
 	}
 
 	c.JSON(consts.StatusOK, resp)
