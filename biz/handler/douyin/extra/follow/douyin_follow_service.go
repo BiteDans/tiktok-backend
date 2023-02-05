@@ -28,25 +28,48 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow.DouyinRelationActionResponse)
 	curUserReq := req.Token
-	curUserId, err1 := utils.GetIdFromToken(curUserReq)
-	if err1 != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+	curUserId, err := utils.GetIdFromToken(curUserReq)
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		c.String(consts.StatusUnauthorized, err.Error())
 		return
 	}
 
 	curUser := new(model.User)
+	if err := model.FindUserById(curUser, curUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Currrent user id does not exist"
+
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
 	toUser := new(model.User)
+	if err := model.FindUserById(toUser, uint(req.ToUserId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Target user id does not exist"
+
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
 
 	actionType := req.ActionType
-	if err := model.CreateFollowRecord(curUser, toUser, curUserId, uint(req.ToUserId), uint(actionType)); err != nil {
+
+	if err := model.CreateFollowRecord(curUser, toUser, uint(actionType)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to follow target user"
+
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Failed to create user record: %v", err)
 		return
 	}
 
 	resp.StatusCode = 0
 	if actionType == 1 {
-		resp.StatusMsg = "Followed Successful"
+		resp.StatusMsg = "Followed Successfully"
 	} else {
-		resp.StatusMsg = "UnFollowed Successful"
+		resp.StatusMsg = "Unfollowed Successfully"
 	}
 
 	c.JSON(consts.StatusOK, resp)
@@ -78,7 +101,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	curUser := new(model.User)
 	if err = model.FindUserById(curUser, curUserId); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "User id does not exist"
+		resp.StatusMsg = "Current user id does not exist"
 		resp.UserList = nil
 		c.JSON(consts.StatusBadRequest, resp)
 		return
@@ -88,7 +111,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 	targetUserId := uint(req.UserId)
 	if err = model.FindUserById(targetUser, targetUserId); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "User id does not exist"
+		resp.StatusMsg = "Target user id does not exist"
 		resp.UserList = nil
 		c.JSON(consts.StatusBadRequest, resp)
 		return
@@ -98,27 +121,27 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 
 	if err = model.GetFollowListByUser(&uList, targetUser); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "DB Find error"
+		resp.StatusMsg = "Failed to get follow list"
 		resp.UserList = nil
 		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Errorf("DB GetFollowInfo Error: %v", err)
+		hlog.Errorf("Failed to get follow list: %v", err)
 		return
 	}
 
 	var respList []*follow.User
 	for _, u := range uList {
 		userResp := new(follow.User)
-		if err := model.GetFollowInfoByUsers(curUser, u, userResp); err != nil {
+		if err := GetFollowInfoByUsers(curUser, u, userResp); err != nil {
 			resp.StatusCode = -1
-			resp.StatusMsg = "DB GetFollowInfo Error"
+			resp.StatusMsg = "Failed to retrieve follow relation"
 			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("DB GetFollowInfo Error: %v", err)
+			hlog.Errorf("Failed to retrieve follow relation: %v", err)
 			return
 		}
 		respList = append(respList, userResp)
 	}
 	resp.StatusCode = 0
-	resp.StatusMsg = "FollowList retrieved successfully"
+	resp.StatusMsg = "Follow list retrieved successfully"
 	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
@@ -150,7 +173,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	curUser := new(model.User)
 	if err = model.FindUserById(curUser, curUserId); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "User id does not exist"
+		resp.StatusMsg = "Current user id does not exist"
 		resp.UserList = nil
 		c.JSON(consts.StatusBadRequest, resp)
 		return
@@ -160,7 +183,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	targetUserId := uint(req.UserId)
 	if err = model.FindUserById(targetUser, targetUserId); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "User id does not exist"
+		resp.StatusMsg = "Target user id does not exist"
 		resp.UserList = nil
 		c.JSON(consts.StatusBadRequest, resp)
 		return
@@ -170,29 +193,40 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 
 	if err = model.GetFollowerListByUser(&uList, targetUser); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "DB Find error"
+		resp.StatusMsg = "Failed to get follower list"
 		resp.UserList = nil
 		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Errorf("DB GetFollowerInfo Error: %v", err)
+		hlog.Errorf("Failed to get follower list: %v", err)
 		return
 	}
 
 	var respList []*follow.User
 	for _, u := range uList {
 		userResp := new(follow.User)
-		if err := model.GetFollowInfoByUsers(curUser, u, userResp); err != nil {
+		if err := GetFollowInfoByUsers(curUser, u, userResp); err != nil {
 			resp.StatusCode = -1
-			resp.StatusMsg = "DB GetFollowerInfo Error"
+			resp.StatusMsg = "Failed to get follower list"
 			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("DB GetFollowerInfo Error: %v", err)
+			hlog.Errorf("Failed to get follower list: %v", err)
 			return
 		}
 		respList = append(respList, userResp)
 	}
 	resp.StatusCode = 0
-	resp.StatusMsg = "FollowerList retrieved successfully"
+	resp.StatusMsg = "Follower list retrieved successfully"
 	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
+}
 
+func GetFollowInfoByUsers(from_user *model.User, to_user *model.User, user_resp *follow.User) error {
+	var err error
+	user_resp.ID = int64(to_user.ID)
+	user_resp.Name = to_user.Username
+	user_resp.FollowCount = model.GetFollowCount(to_user)
+	user_resp.FollowerCount = model.GetFollowerCount(to_user)
+	if user_resp.IsFollow, err = model.GetFollowRelation(from_user.ID, to_user.ID); err != nil {
+		return err
+	}
+	return nil
 }

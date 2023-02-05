@@ -2,7 +2,6 @@ package model
 
 import (
 	"BiteDans.com/tiktok-backend/biz/dal"
-	"BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
 	"gorm.io/gorm"
 )
 
@@ -15,7 +14,7 @@ type User struct {
 }
 
 func (u *User) TableName() string {
-	return "users"
+	return "user"
 }
 
 func FindUserById(u *User, id uint) error {
@@ -28,18 +27,6 @@ func FindUserByUsername(u *User, username string) error {
 
 func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
-}
-
-func GetFollowInfoByUsers(from_user *User, to_user *User, user_resp *follow.User) error {
-	var err error
-	user_resp.ID = int64(to_user.ID)
-	user_resp.Name = to_user.Username
-	user_resp.FollowCount = GetFollowCount(to_user)
-	user_resp.FollowerCount = GetFollowerCount(to_user)
-	if user_resp.IsFollow, err = GetFollowRelation(from_user.ID, to_user.ID); err != nil {
-		return err
-	}
-	return nil
 }
 
 func GetFollowRelation(from_user_id uint, to_user_id uint) (bool, error) {
@@ -65,15 +52,7 @@ func GetFollowerCount(user *User) int64 {
 	return dal.DB.Model(user).Association("Followers").Count()
 }
 
-func CreateFollowRecord(uc *User, ut *User, ucId uint, utId uint, t uint) error {
-	if err := FindUserById(uc, ucId); err != nil {
-		return err
-	}
-
-	if err := FindUserById(ut, utId); err != nil {
-		return err
-	}
-
+func CreateFollowRecord(uc *User, ut *User, t uint) error {
 	if t == 1 {
 		return dal.DB.Model(uc).Association("Followings").Append(ut)
 	}
