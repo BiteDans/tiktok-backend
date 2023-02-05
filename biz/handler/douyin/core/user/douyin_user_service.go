@@ -26,9 +26,9 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user.DouyinUserResponse)
 
-	//TODO: get current user id and determine if the
-	//target user is followed by current user
-	if _, err = utils.GetIdFromToken(req.Token); err != nil {
+	var curUserId uint
+
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.User = nil
@@ -47,15 +47,29 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	resp_user := &user.User{}
+	var isFollow bool
+
+	isFollow, err = model.GetFollowRelation(curUserId, uint(req.UserId))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to retrieve user info"
+		resp.User = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+
+		hlog.Errorf("Failed to retrieve user info: %v", err)
+		return
+	}
+
+	resp_user.ID = int64(_user.ID)
+	resp_user.Name = _user.Username
+	resp_user.FollowCount = model.GetFollowCount(_user)
+	resp_user.FollowerCount = model.GetFollowerCount(_user)
+	resp_user.IsFollow = isFollow
+
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
-	resp.User = &user.User{
-		ID:            int64(_user.ID),
-		Name:          _user.Username,
-		FollowCount:   123,
-		FollowerCount: 456,
-		IsFollow:      true,
-	}
+	resp.User = resp_user
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -100,7 +114,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to log in (Token generation failed)"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to generate token")
+		hlog.Errorf("Failed to generate token: %v", err)
 		return
 	}
 
@@ -141,7 +155,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to register user"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to create user into database")
+		hlog.Errorf("Failed to create user into database: %v", err)
 		return
 	}
 
@@ -152,7 +166,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to log in (Token generation failed)"
 		c.JSON(consts.StatusInternalServerError, resp)
 
-		hlog.Error("Failed to generate token")
+		hlog.Errorf("Failed to generate token: %v", err)
 		return
 	}
 
