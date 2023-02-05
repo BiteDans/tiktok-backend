@@ -1,7 +1,7 @@
 namespace go douyin.core.video
 
 struct douyinVideoFeedRequest {
-    1: i64  latestTime (api.body="latest_time")
+    1: i64  latestTime (api.query="latest_time")
     2: string  token
 }
 
@@ -23,7 +23,7 @@ struct douyinVideoPublishResponse {
 }
 
 struct douyinVideoPublishListRequest {
-    1: i64  userId (api.body="user_id")
+    1: i64  userId (api.query="user_id", api.body="user_id")
     2: string  token
 }
 

@@ -1,6 +1,8 @@
 package model
 
 import (
+	"time"
+
 	"BiteDans.com/tiktok-backend/biz/dal"
 	"gorm.io/gorm"
 )
@@ -8,6 +10,7 @@ import (
 type Video struct {
 	gorm.Model
 	AuthorId      int64  `json:"author_id" column:"author_id"`
+	AuthorUsername      string  `json:"author_username" column:"author_username"`
 	PlayUrl       string `json:"play_url" column:"play_url"`
 	CoverUrl      string `json:"cover_url" column:"cover_url"`
 	FavoriteCount int64  `json:"favorite_count" column:"favorite_count"`
@@ -25,8 +28,10 @@ func FindVideoById(v *Video, id uint) error {
 	return dal.DB.First(&v, id).Error
 }
 
-func FindVideosByUserId(v []*Video, id int64) error {
-	return dal.DB.Where("author_id = ?", id).Find(&v).Error
+func FindVideosByUserId(id int64) ([]*Video, error) {
+	var _videos []*Video
+	err := dal.DB.Where("author_id = ?", id).Find(&_videos).Error
+	return _videos, err
 }
 
 func CreateVideo(v *Video) error {
@@ -37,4 +42,10 @@ func GetVideoCount() (int, error) {
 	var totalRows int64
 	err := dal.DB.Model(Video{}).Count(&totalRows).Error
 	return int(totalRows), err
+}
+
+func FindLatestVideos(time time.Time) ([]*Video, error) {
+	var _videos []*Video
+	err := dal.DB.Order("created_at desc").Limit(30).Where("created_at < ?", time).Find(&_videos).Error
+	return _videos, err
 }

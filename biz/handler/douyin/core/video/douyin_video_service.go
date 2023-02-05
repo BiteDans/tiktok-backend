@@ -6,10 +6,10 @@ import (
 	"context"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"os"
 
-	"BiteDans.com/tiktok-backend/biz/dal"
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/video"
@@ -22,15 +22,54 @@ import (
 // VideoFeed .
 // @router /douyin/feed [GET]
 func VideoFeed(ctx context.Context, c *app.RequestContext) {
-	var err error
+	// var err error
 	var req video.DouyinVideoFeedRequest
-	err = c.BindAndValidate(&req)
+	_ = c.Bind(&req)
+	
+	resp := new(video.DouyinVideoFeedResponse)
+
+	now := time.Now() 
+	latestTime := req.LatestTime
+	
+	if latestTime == 0 {
+		latestTime = now.UnixMilli()
+	}
+	unixTime := time.UnixMilli(latestTime)
+	
+	videos, err := model.FindLatestVideos(unixTime)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to retrieve videos"
+		resp.VideoList = nil
+		hlog.Errorf("Failed to find videos from the database with error: %s", err.Error())
+		c.JSON(consts.StatusInternalServerError, resp)
 		return
 	}
 
-	resp := new(video.DouyinVideoFeedResponse)
+	resp.StatusCode = 0
+	resp.StatusMsg = "Publishing list info retrieved successfully"
+	resp.VideoList = []*video.Video{}
+
+	for _, _video := range videos {
+		the_user := &user.User{
+			ID:            int64(_video.AuthorId),
+			Name:          _video.AuthorUsername,
+			FollowCount:   123,
+			FollowerCount: 456,
+			IsFollow:      true,
+		}
+		the_video := &video.Video{
+			ID:            int64(_video.ID),
+			Author:        (*video.User)(the_user),
+			PlayUrl:       _video.PlayUrl,
+			CoverUrl:      _video.CoverUrl,
+			FavoriteCount: _video.FavoriteCount,
+			CommentCount:  _video.CommentCount,
+			IsFavorite:    false,
+			Title:         _video.Title,
+		}
+		resp.VideoList = append(resp.VideoList, the_video)
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -41,7 +80,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req video.DouyinVideoPublishRequest
 	resp := new(video.DouyinVideoPublishResponse)
-	
+
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		resp.StatusMsg = err.Error()
@@ -73,9 +112,9 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	fullImagename := filename + ".png"
 
 	_ = os.Mkdir("./files", 0755)
-	c.SaveUploadedFile(file, "./files/" + fullFilename)
+	c.SaveUploadedFile(file, "./files/"+fullFilename)
 
-	_, err = utils.GetSnapshot("./files/" + fullFilename, "./files/" + filename, 1)
+	_, err = utils.GetSnapshot("./files/"+fullFilename, "./files/"+filename, 1)
 
 	if err != nil {
 		hlog.Errorf("Failed to create snapshot image: %s", err.Error())
@@ -100,8 +139,17 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	_ = os.Remove("./files/" + fullFilename)
 	_ = os.Remove("./files/" + fullImagename)
 
+	author := new(model.User)
+	err = model.FindUserById(author, userId)
+	if err != nil {
+		hlog.Errorf("Failed to save new video to the database with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+
 	_video := new(model.Video)
 	_video.AuthorId = int64(userId)
+	_video.AuthorUsername = author.Username
 	_video.PlayUrl = videoOutput
 	_video.CoverUrl = coverOutput
 	_video.Title = req.Title
@@ -150,23 +198,21 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var _videos []*model.Video
-
-	if err = model.FindVideosByUserId(_videos, int64(_user.ID)); err != nil {
+	videos, err := model.FindVideosByUserId(int64(_user.ID))
+	if err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Fail to retrieve videos from User id"
+		resp.StatusMsg = "Failed to retrieve videos"
 		resp.VideoList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Errorf("Failed to find videos from the database with error: %s", err.Error())
+		c.JSON(consts.StatusInternalServerError, resp)
 		return
 	}
-
-	dal.DB.Where("author_id = ?", int64(_user.ID)).Find(&_videos)
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "Publishing list info retrieved successfully"
 	resp.VideoList = []*video.Video{}
 
-	for _, _video := range _videos {
+	for _, _video := range videos {
 		the_user := &user.User{
 			ID:            int64(_user.ID),
 			Name:          _user.Username,

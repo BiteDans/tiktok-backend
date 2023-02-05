@@ -9,7 +9,7 @@ import (
 )
 
 type DouyinVideoFeedRequest struct {
-	LatestTime int64  `thrift:"latestTime,1" form:"latest_time" json:"latest_time"`
+	LatestTime int64  `thrift:"latestTime,1" json:"latestTime" query:"latest_time"`
 	Token      string `thrift:"token,2" form:"token" json:"token" query:"token"`
 }
 
@@ -852,7 +852,7 @@ func (p *DouyinVideoPublishResponse) String() string {
 }
 
 type DouyinVideoPublishListRequest struct {
-	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id"`
+	UserId int64  `thrift:"userId,1" form:"user_id" json:"user_id" query:"user_id"`
 	Token  string `thrift:"token,2" form:"token" json:"token" query:"token"`
 }
 
