@@ -56,13 +56,24 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 
 	actionType := req.ActionType
 
-	if err := model.CreateFollowRecord(curUser, toUser, uint(actionType)); err != nil {
-		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to follow target user"
-
-		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Errorf("Failed to create user record: %v", err)
-		return
+	if actionType == 1 {
+		err = model.UserFollow(curUser, toUser)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to follow target user"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to follow user: %v", err)
+			return
+		}
+	} else if actionType == 2 {
+		err = model.UserUnfollow(curUser, toUser)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to unfollow target user"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to unfollow user: %v", err)
+			return
+		}
 	}
 
 	resp.StatusCode = 0

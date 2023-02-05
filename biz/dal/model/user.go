@@ -52,10 +52,11 @@ func GetFollowerCount(user *User) int64 {
 	return dal.DB.Model(user).Association("Followers").Count()
 }
 
-func CreateFollowRecord(uc *User, ut *User, t uint) error {
-	if t == 1 {
-		return dal.DB.Model(uc).Association("Followings").Append(ut)
-	}
+func UserFollow(uc *User, ut *User) error {
+	return dal.DB.Model(uc).Association("Followings").Append(ut)
+}
+
+func UserUnfollow(uc *User, ut *User) error {
 	return dal.DB.Model(uc).Association("Followings").Delete(ut)
 }
 
