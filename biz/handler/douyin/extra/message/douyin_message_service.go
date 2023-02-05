@@ -25,6 +25,55 @@ func MessageSend(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(message.DouyinRelationActionResponse)
 
+	senderuser := new(model.User)
+	receiveruser := new(model.User)
+	var userID uint
+	if userID, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	if err = model.FindUserById(senderuser, userID); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Sender user id does not exist"
+
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	if err = model.FindUserById(receiveruser, uint(req.ToUserId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Receiver user id does not exist"
+
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	if req.ActionType == 1 {
+		_message := new(model.Message)
+		_message.ToUserId = req.ToUserId
+		_message.FromUserId = int64(userID)
+		_message.Content = req.Content
+		if err = model.CreateMessage(_message); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Message creation failed"
+
+			c.JSON(consts.StatusInternalServerError, resp)
+			return
+		}
+	} else {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Action type not defined"
+
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "Message sent successfully"
 	c.JSON(consts.StatusOK, resp)
 }
 
