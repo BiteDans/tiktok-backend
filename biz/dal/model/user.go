@@ -92,7 +92,7 @@ func GetFollowerCount(user *User) int64 {
 	return dal.DB.Model(user).Association("Followers").Count()
 }
 
-func UserFollowAction(uc *User, ut *User, t uint) error {
+func CreateFollowRecord(uc *User, ut *User, t uint) error {
 	if t == 1 {
 		return dal.DB.Model(uc).Association("Followings").Append(ut)
 	}
