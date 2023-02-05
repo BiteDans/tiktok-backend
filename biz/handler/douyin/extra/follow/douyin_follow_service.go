@@ -4,7 +4,7 @@ package follow
 
 import (
 	"context"
-	"fmt"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/utils"
@@ -72,10 +72,18 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	curUser := new(model.User)
+	if err = model.FindUserById(curUser, curUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
 	/* get target User */
-	_user := new(model.User)
+	targetUser := new(model.User)
 	targetUserId := uint(req.UserId)
-	if err = model.FindUserById(_user, targetUserId); err != nil {
+	if err = model.FindUserById(targetUser, targetUserId); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.UserList = nil
@@ -85,19 +93,23 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 
 	var uList []*model.User
 
-	if err = model.GetFollowListByUser(&uList, _user); err != nil {
+	if err = model.GetFollowListByUser(&uList, targetUser); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "DB Find error"
 		resp.UserList = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Errorf("DB GetFollowInfo Error: %v", err)
 		return
 	}
 
 	var respList []*follow.User
 	for _, u := range uList {
 		userResp := new(follow.User)
-		if err := model.GetFollowInfoByIDs(curUserId, u.ID, userResp); err != nil {
-			resp.StatusMsg = "wrong"
+		if err := model.GetFollowInfoByUsers(curUser, u, userResp); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "DB GetFollowInfo Error"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("DB GetFollowInfo Error: %v", err)
 			return
 		}
 		respList = append(respList, userResp)
@@ -120,37 +132,63 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	resp := new(follow.DouyinRelationFollowerListResponse)
-	curUserReq := req.Token
-	curUserId, err1 := utils.GetIdFromToken(curUserReq)
-	if err1 != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+
+	/* get curUserId */
+	var curUserId uint
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.UserList = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
 		return
 	}
 
-	toUserId := req.UserId
-
-	var idList []uint
 	curUser := new(model.User)
-	model.FindUserById(curUser, uint(toUserId))
-	idList, _ = model.GetFollowersId(curUser)
-
-	fmt.Println(idList)
-	var followerList []*follow.User
-	for i := 0; i < len(idList); i++ {
-		user := new(follow.User)
-		if err := model.GetFollowInfoByIDs(curUserId, idList[i], user); err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "wrong"
-			return
-		}
-		followerList = append(followerList, user)
+	if err = model.FindUserById(curUser, curUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+	/* get target User */
+	targetUser := new(model.User)
+	targetUserId := uint(req.UserId)
+	if err = model.FindUserById(targetUser, targetUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
 	}
 
-	fmt.Println(followerList)
+	var uList []*model.User
 
+	if err = model.GetFollowerListByUser(&uList, targetUser); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "DB Find error"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Errorf("DB GetFollowerInfo Error: %v", err)
+		return
+	}
+
+	var respList []*follow.User
+	for _, u := range uList {
+		userResp := new(follow.User)
+		if err := model.GetFollowInfoByUsers(curUser, u, userResp); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "DB GetFollowerInfo Error"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("DB GetFollowerInfo Error: %v", err)
+			return
+		}
+		respList = append(respList, userResp)
+	}
 	resp.StatusCode = 0
-	resp.StatusMsg = "Get follower list successfully"
-	resp.UserList = followerList
+	resp.StatusMsg = "FollowerList retrieved successfully"
+	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
 
