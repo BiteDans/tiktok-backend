@@ -100,7 +100,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "DB Find error"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusInternalServerError, resp)
 		hlog.Errorf("DB GetFollowInfo Error: %v", err)
 		return
 	}
@@ -172,7 +172,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "DB Find error"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusInternalServerError, resp)
 		hlog.Errorf("DB GetFollowerInfo Error: %v", err)
 		return
 	}
