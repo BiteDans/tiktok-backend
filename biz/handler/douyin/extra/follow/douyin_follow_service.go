@@ -34,14 +34,6 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	curUser := new(model.User)
 	toUser := new(model.User)
 
-	//if err := model.FindUserById(curUser, curUserId); err != nil {
-	//	return
-	//}
-	//
-	//if err := model.FindUserById(toUser, uint(req.ToUserId)); err != nil {
-	//	return
-	//}
-
 	actionType := req.ActionType
 	if err := model.CreateFollowRecord(curUser, toUser, curUserId, uint(req.ToUserId), uint(actionType)); err != nil {
 		return
