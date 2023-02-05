@@ -3,6 +3,8 @@
 package message
 
 import (
+	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/pkg/utils"
 	"context"
 
 	message "BiteDans.com/tiktok-backend/biz/model/douyin/extra/message"
@@ -38,6 +40,63 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(message.DouyinMessageChatResponse)
+
+	var user_id uint
+
+	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.MessageList = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	_user := new(model.User)
+
+	if err = model.FindUserById(_user, user_id); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "This User id does not exist"
+		resp.MessageList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	receiver := new(model.User)
+
+	if err = model.FindUserById(receiver, uint(req.ToUserId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Receiver id does not exist"
+		resp.MessageList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	var _messages []*model.Message
+
+	if _messages, err = model.FindMessageBySenderandReceiverId(_messages, user_id, uint(req.ToUserId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Fail to retrieve messages from this user to specified user"
+		resp.MessageList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Messages retrieved successfully"
+	resp.MessageList = []*message.Message{}
+
+	for _, _message := range _messages {
+		create_time := _message.CreatedAt.String()
+		the_message := &message.Message{
+			ID:         int64(_message.ID),
+			ToUserId:   _message.ToUserId,
+			FromUserId: _message.FromUserId,
+			Content:    _message.Content,
+			CreateTime: create_time,
+		}
+		resp.MessageList = append(resp.MessageList, the_message)
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }

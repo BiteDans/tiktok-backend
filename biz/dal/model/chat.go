@@ -20,8 +20,10 @@ func FindMessageById(m *Message, id uint) error {
 	return dal.DB.First(&m, id).Error
 }
 
-func FindMessageBySenderandReceiverId(m []*Message, sender_id uint, receiver_id uint) error {
-	return dal.DB.Where("to_user_id = ? AND from_user_id = ?", receiver_id, sender_id).Find(&m).Error
+func FindMessageBySenderandReceiverId(m []*Message, sender_id uint, receiver_id uint) ([]*Message, error) {
+	var message []*Message
+	err := dal.DB.Where("to_user_id = ? AND from_user_id = ?", receiver_id, sender_id).Find(&message).Error
+	return message, err
 }
 
 func CreateMessage(m *Message) error {
