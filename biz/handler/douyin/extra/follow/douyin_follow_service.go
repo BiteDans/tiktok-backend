@@ -8,6 +8,7 @@ import (
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 
 	follow "BiteDans.com/tiktok-backend/biz/model/douyin/extra/follow"
@@ -55,31 +56,24 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	actionType := req.ActionType
-
-	if actionType == 1 {
+	if actionType == constants.FOLLOW_ACTION {
 		err = model.UserFollow(curUser, toUser)
-		if err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Failed to follow target user"
-			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("Failed to follow user: %v", err)
-			return
-		}
-	} else if actionType == 2 {
+	} else if actionType == constants.UNFOLLOW_ACTION {
 		err = model.UserUnfollow(curUser, toUser)
-		if err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Failed to unfollow target user"
-			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("Failed to unfollow user: %v", err)
-			return
-		}
+	}
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to follow/unfollow target user"
+
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Failed to create user record: %v", err)
+		return
 	}
 
 	resp.StatusCode = 0
-	if actionType == 1 {
+	if actionType == constants.FOLLOW_ACTION {
 		resp.StatusMsg = "Followed Successfully"
-	} else {
+	} else if actionType == constants.UNFOLLOW_ACTION {
 		resp.StatusMsg = "Unfollowed Successfully"
 	}
 
