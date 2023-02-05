@@ -23,7 +23,7 @@ struct douyinVideoPublishResponse {
 }
 
 struct douyinVideoPublishListRequest {
-    1: i64  userId (api.query="user_id", api.body="user_id")
+    1: i64  userId (api.query="user_id")
     2: string  token
 }
 

@@ -14,7 +14,7 @@ CREATE TABLE `video`
 (
     `id`         bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'PK',
     `author_id`   bigint unsigned NOT NULL COMMENT 'Author (user) id',
-    `author_username`   varchar(256) NOT NULL DEFAULT '' COMMENT 'Author (user) username',
+    `author_username`   varchar(128) NOT NULL DEFAULT '' COMMENT 'Author (user) username',
     `play_url`   varchar(256) NOT NULL DEFAULT '' COMMENT 'Url to where the video is stored',
     `cover_url`   varchar(256) NOT NULL DEFAULT '' COMMENT 'Url to where the cover of the video is stored',
     `favorite_count`   bigint unsigned NOT NULL DEFAULT 0 COMMENT 'Number of likes one video has received',

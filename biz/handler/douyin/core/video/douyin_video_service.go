@@ -49,6 +49,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 	resp.StatusCode = 0
 	resp.StatusMsg = "Publishing list info retrieved successfully"
 	resp.VideoList = []*video.Video{}
+	resp.NextTime = now.UnixMilli()
 
 	for _, _video := range videos {
 		the_user := &user.User{
@@ -69,6 +70,9 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			Title:         _video.Title,
 		}
 		resp.VideoList = append(resp.VideoList, the_video)
+		if resp.NextTime > _video.CreatedAt.UnixMilli() {
+			resp.NextTime = _video.CreatedAt.UnixMilli()
+		}
 	}
 
 	c.JSON(consts.StatusOK, resp)
