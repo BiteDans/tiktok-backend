@@ -7,6 +7,7 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
@@ -60,6 +61,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
+		hlog.Error("Failed to bind and validate")
 		return
 	}
 
@@ -72,6 +74,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.Comment = nil
 
 		c.JSON(consts.StatusUnauthorized, resp)
+		hlog.Error("The token is invalid")
 		return
 	}
 
@@ -81,6 +84,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "User id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Failed to query user id in database")
 		return
 	}
 
@@ -90,10 +94,20 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Video id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Failed to query video id in database")
 		return
 	}
 
-	if req.ActionType == 1 {
+	if req.ActionType != constants.POST_COMMENT && req.ActionType != constants.DELETE_COMMENT {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Fail to get action type"
+		resp.Comment = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Action type is not POST_COMMENT or DELETE_COMMENT")
+		return
+	}
+
+	if req.ActionType == constants.POST_COMMENT {
 		comment := new(model.Comment)
 		comment.UserId = int64(user_id)
 		comment.VideoId = req.VideoId
@@ -113,43 +127,42 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			ID:         0,
 			User:       nil,
 			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.Format("01-06"),
+			CreateDate: comment.CreatedAt.Format("01-02"),
 		}
-	} else if req.ActionType == 2 {
-		comment := new(model.Comment)
-		if comment, err = model.FindCommentById(req.CommentId); err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Comment id does not exist"
-			resp.Comment = nil
-			c.JSON(consts.StatusBadRequest, resp)
-			return
-		}
+		c.JSON(consts.StatusOK, resp)
+	}
 
-		if comment.UserId != (int64(user_id)) {
-			resp.StatusCode = -1
-			resp.StatusMsg = "You can not delete comment that does not belong to you"
-			resp.Comment = nil
-			c.JSON(consts.StatusBadRequest, resp)
-			return
-		}
-
-		if err = model.DeleteComment(comment); err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Fail to delete comment"
-			resp.Comment = nil
-			c.JSON(consts.StatusInternalServerError, resp)
-			return
-		}
-		resp.StatusCode = 0
-		resp.StatusMsg = "delete comment successfully"
-		resp.Comment = nil
-	} else {
+	//Delete comment
+	comment := new(model.Comment)
+	if comment, err = model.FindCommentById(req.CommentId); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Fail to get action type"
+		resp.StatusMsg = "Comment id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Failed to query comment id in database")
 		return
 	}
+
+	if comment.UserId != (int64(user_id)) {
+		resp.StatusCode = -1
+		resp.StatusMsg = "You can not delete comment that does not belong to you"
+		resp.Comment = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("You can not delete comment that does not belong to you")
+		return
+	}
+
+	if err = model.DeleteComment(comment); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Fail to delete comment"
+		resp.Comment = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Error("Failed to delete comment in database")
+		return
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "delete comment successfully"
+	resp.Comment = nil
 
 	c.JSON(consts.StatusOK, resp)
 }
@@ -162,6 +175,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
+		hlog.Error("Failed to bind and validate")
 		return
 	}
 
@@ -174,6 +188,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.CommentList = nil
 
 		c.JSON(consts.StatusUnauthorized, resp)
+		hlog.Error("The token is invalid")
 		return
 	}
 
@@ -183,6 +198,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "User id does not exist"
 		resp.CommentList = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Failed to query user id in database")
 		return
 	}
 
@@ -192,6 +208,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Video id does not exist"
 		resp.CommentList = nil
 		c.JSON(consts.StatusBadRequest, resp)
+		hlog.Error("Failed to query video id in database")
 		return
 	}
 
@@ -202,6 +219,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to retrieve comments of the video"
 		resp.CommentList = nil
 		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Error("Failed to query comments id with video id in database")
 		return
 	}
 
@@ -216,6 +234,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			resp.StatusMsg = "User id does not exist in comment"
 			resp.CommentList = nil
 			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Error("The user with user id in comment is not exist")
 			return
 		}
 
@@ -231,7 +250,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			ID:         int64(comment.ID),
 			User:       (*interaction.User)(format_user),
 			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.Format("01-06"),
+			CreateDate: comment.CreatedAt.Format("01-02"),
 		}
 		resp.CommentList = append(resp.CommentList, the_comment)
 	}

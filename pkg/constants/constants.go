@@ -6,4 +6,6 @@ const (
 	REGION          = "us-west-1"
 	FOLLOW_ACTION   = 1
 	UNFOLLOW_ACTION = 0
+	POST_COMMENT    = 1
+	DELETE_COMMENT  = 2
 )
