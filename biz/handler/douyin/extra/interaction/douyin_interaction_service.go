@@ -109,7 +109,31 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			CreateDate: comment.CreatedAt.String(),
 		}
 	} else if req.ActionType == 2 {
-		
+		comment := new(model.Comment)
+		if comment, err = model.FindCommentById(req.CommentId); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Comment id does not exist"
+			resp.Comment = nil
+			c.JSON(consts.StatusBadRequest, resp)
+			return
+		}
+
+		if err = model.DeleteComment(comment); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Fail to delete comment"
+			resp.Comment = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			return
+		}
+		resp.StatusCode = 0
+		resp.StatusMsg = "delete comment successfully"
+		resp.Comment = nil
+	} else {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Fail to get action type"
+		resp.Comment = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
 	}
 
 	c.JSON(consts.StatusOK, resp)
