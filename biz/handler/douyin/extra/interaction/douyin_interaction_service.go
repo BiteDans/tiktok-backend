@@ -3,10 +3,11 @@
 package interaction
 
 import (
+	"context"
+
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/pkg/utils"
-	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 
 	interaction "BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
@@ -107,7 +108,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			ID:         0,
 			User:       nil,
 			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.String(),
+			CreateDate: comment.CreatedAt.Format("01-06"),
 		}
 	} else if req.ActionType == 2 {
 		comment := new(model.Comment)
@@ -225,7 +226,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			ID:         int64(comment.ID),
 			User:       (*interaction.User)(format_user),
 			Content:    comment.Content,
-			CreateDate: comment.CreatedAt.String(),
+			CreateDate: comment.CreatedAt.Format("01-06"),
 		}
 		resp.CommentList = append(resp.CommentList, the_comment)
 	}
