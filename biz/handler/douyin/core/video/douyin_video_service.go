@@ -235,13 +235,11 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	author := &user.User{
 		ID:            int64(_user.ID),
 		Name:          _user.Username,
-		FollowCount:   123,
-		FollowerCount: 456,
+		FollowCount:   model.GetFollowCount(_user),
+		FollowerCount: model.GetFollowerCount(_user),
 		IsFollow:      true,
 	}
 
-	author.FollowCount = model.GetFollowCount(_user)
-	author.FollowerCount = model.GetFollowerCount(_user)
 	isFollowingAuthor, err := model.GetFollowRelation(userId, _user.ID)
 	if err != nil {
 		hlog.Errorf("Failed to get user relation from database with error: %s", err.Error())
