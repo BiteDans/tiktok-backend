@@ -4,6 +4,7 @@ package interaction
 
 import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
+	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"context"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -118,6 +119,14 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		if comment.UserId != (int64(user_id)) {
+			resp.StatusCode = -1
+			resp.StatusMsg = "You can not delete comment that does not belong to you"
+			resp.Comment = nil
+			c.JSON(consts.StatusBadRequest, resp)
+			return
+		}
+
 		if err = model.DeleteComment(comment); err != nil {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Fail to delete comment"
@@ -151,6 +160,75 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(interaction.DouyinCommentListResponse)
+
+	var user_id uint
+	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.CommentList = nil
+
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+
+	_user := new(model.User)
+	if err = model.FindUserById(_user, user_id); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "User id does not exist"
+		resp.CommentList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	_video := new(model.Video)
+	if err = model.FindVideoById(_video, uint(req.VideoId)); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Video id does not exist"
+		resp.CommentList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
+	var _comments []*model.Comment
+	_comments, err = model.FindCommentsByVideoId(req.VideoId)
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to retrieve comments of the video"
+		resp.CommentList = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Video comments retrieved successfully"
+	resp.CommentList = []*interaction.Comment{}
+
+	for _, comment := range _comments {
+		the_user := new(model.User)
+		if err = model.FindUserById(the_user, uint(comment.UserId)); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "User id does not exist in comment"
+			resp.CommentList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			return
+		}
+
+		format_user := &user.User{
+			ID:            int64(the_user.ID),
+			Name:          the_user.Username,
+			FollowCount:   int64(len(the_user.Followings)),
+			FollowerCount: int64(len(the_user.Followers)),
+			IsFollow:      false,
+		}
+
+		the_comment := &interaction.Comment{
+			ID:         int64(comment.ID),
+			User:       (*interaction.User)(format_user),
+			Content:    comment.Content,
+			CreateDate: comment.CreatedAt.String(),
+		}
+		resp.CommentList = append(resp.CommentList, the_comment)
+	}
 
 	c.JSON(consts.StatusOK, resp)
 }
