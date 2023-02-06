@@ -18,7 +18,7 @@ func (c *Comment) TableName() string {
 
 func FindCommentsByVideoId(id int64) ([]*Comment, error) {
 	var _comments []*Comment
-	err := dal.DB.Where("video_id = ?", id).Find(&_comments).Error
+	err := dal.DB.Where("video_id = ?", id).Order("created_at desc").Find(&_comments).Error
 	return _comments, err
 }
 
