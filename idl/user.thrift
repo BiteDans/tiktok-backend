@@ -44,7 +44,7 @@ struct douyinUserLoginResponse {
 }
 
 service douyinUserService {
-    douyinUserResponse UserInfo(1: douyinUserRequest req) (api.get="/douyin/user")
+    douyinUserResponse UserInfo(1: douyinUserRequest req) (api.get="/douyin/user/")
     douyinUserRegisterResponse UserRegister(1: douyinUserRegisterRequest req) (api.post="/douyin/user/register/")
     douyinUserLoginResponse UserLogin(1: douyinUserLoginRequest req) (api.post="/douyin/user/login/")
 }
