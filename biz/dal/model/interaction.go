@@ -43,3 +43,7 @@ func FindCommentById(id int64) (*Comment, error) {
 func CreateComment(c *Comment) error {
 	return dal.DB.Create(c).Error
 }
+
+func DeleteComment(c *Comment) error {
+	return dal.DB.Delete(&c).Error
+}
