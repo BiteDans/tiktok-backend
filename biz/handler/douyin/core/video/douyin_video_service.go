@@ -47,15 +47,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	var curUserId uint
-	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
-		resp.StatusCode = -1
-		resp.StatusMsg = "Invalid token"
-		resp.VideoList = nil
-		resp.NextTime = 0
-
-		c.JSON(consts.StatusUnauthorized, resp)
-		return
-	}
+	curUserId, _ = utils.GetIdFromToken(req.Token)
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "Publishing list info retrieved successfully"
@@ -66,7 +58,15 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 		author := new(model.User)
 		author.ID = uint(_video.AuthorId)
 
-		isFollow, _ := model.GetFollowRelation(curUserId, uint(_video.AuthorId))
+		var isFollow bool
+
+		if curUserId == 0 {
+			isFollow = false
+		} else {
+			author := new(model.User)
+			author.ID = uint(_video.AuthorId)
+			isFollow, _ = model.GetFollowRelation(curUserId, uint(_video.AuthorId))
+		}
 
 		the_user := &user.User{
 			ID:            int64(_video.AuthorId),
