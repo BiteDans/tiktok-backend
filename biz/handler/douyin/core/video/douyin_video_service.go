@@ -63,8 +63,6 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 		if curUserId == 0 {
 			isFollow = false
 		} else {
-			author := new(model.User)
-			author.ID = uint(_video.AuthorId)
 			isFollow, _ = model.GetFollowRelation(curUserId, uint(_video.AuthorId))
 		}
 
@@ -199,7 +197,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(video.DouyinVideoPublishListResponse)
-	userId, err := utils.GetIdFromToken(req.Token);
+	userId, err := utils.GetIdFromToken(req.Token)
 	if err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
