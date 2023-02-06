@@ -34,6 +34,7 @@ func main() {
 	dal.Init()
 	dal.DB.AutoMigrate(&model.User{})
 	dal.DB.AutoMigrate(&model.Video{})
+	dal.DB.AutoMigrate(&model.Message{})
 
 	// load .env
 	env.LoadEnv()
