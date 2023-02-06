@@ -16,7 +16,7 @@ import (
 )
 
 // FollowAction .
-// @router /douyin/relation/action [POST]
+// @router /douyin/relation/action/ [POST]
 func FollowAction(ctx context.Context, c *app.RequestContext) {
 	var err error
 	var req follow.DouyinRelationActionRequest
