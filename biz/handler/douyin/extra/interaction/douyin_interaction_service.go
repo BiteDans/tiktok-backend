@@ -119,6 +119,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			CreateDate: comment.CreatedAt.Format("01-02"),
 		}
 		c.JSON(consts.StatusOK, resp)
+		return
 	}
 
 	//Delete comment
