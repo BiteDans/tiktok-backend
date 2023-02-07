@@ -196,12 +196,22 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		var isFollow bool
+		if isFollow, err = model.GetFollowRelation(uint(req.UserId), theUser.ID); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to get follow relation"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to get follow relation for: %s", err.Error())
+			return
+		}
+
 		formatUser := &user.User{
 			ID:            int64(theUser.ID),
 			Name:          theUser.Username,
 			FollowCount:   int64(len(theUser.Followings)),
 			FollowerCount: int64(len(theUser.Followers)),
-			IsFollow:      false,
+			IsFollow:      isFollow,
 		}
 
 		theLike := new(model.Like)
