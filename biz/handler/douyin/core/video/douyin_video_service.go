@@ -47,15 +47,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 	}
 
 	var curUserId uint
-	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
-		resp.StatusCode = -1
-		resp.StatusMsg = "Invalid token"
-		resp.VideoList = nil
-		resp.NextTime = 0
-
-		c.JSON(consts.StatusUnauthorized, resp)
-		return
-	}
+	curUserId, _ = utils.GetIdFromToken(req.Token)
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "Publishing list info retrieved successfully"
@@ -66,7 +58,13 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 		author := new(model.User)
 		author.ID = uint(_video.AuthorId)
 
-		isFollow, _ := model.GetFollowRelation(curUserId, uint(_video.AuthorId))
+		var isFollow bool
+
+		if curUserId == 0 {
+			isFollow = false
+		} else {
+			isFollow, _ = model.GetFollowRelation(curUserId, uint(_video.AuthorId))
+		}
 
 		the_user := &user.User{
 			ID:            int64(_video.AuthorId),
@@ -163,7 +161,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	author := new(model.User)
 	err = model.FindUserById(author, userId)
 	if err != nil {
-		hlog.Errorf("Failed to save new video to the database with error: %s", err.Error())
+		hlog.Errorf("Failed to find user from database with error: %s", err.Error())
 		c.String(consts.StatusInternalServerError, err.Error())
 		return
 	}
@@ -199,12 +197,11 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	resp := new(video.DouyinVideoPublishListResponse)
-
-	if _, err = utils.GetIdFromToken(req.Token); err != nil {
+	userId, err := utils.GetIdFromToken(req.Token)
+	if err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.VideoList = nil
-
 		c.JSON(consts.StatusUnauthorized, resp)
 		return
 	}
@@ -233,17 +230,26 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	resp.StatusMsg = "Publishing list info retrieved successfully"
 	resp.VideoList = []*video.Video{}
 
+	author := &user.User{
+		ID:            int64(_user.ID),
+		Name:          _user.Username,
+		FollowCount:   model.GetFollowCount(_user),
+		FollowerCount: model.GetFollowerCount(_user),
+		IsFollow:      true,
+	}
+
+	isFollowingAuthor, err := model.GetFollowRelation(userId, _user.ID)
+	if err != nil {
+		hlog.Errorf("Failed to get user relation from database with error: %s", err.Error())
+		c.String(consts.StatusInternalServerError, err.Error())
+		return
+	}
+	author.IsFollow = isFollowingAuthor
+
 	for _, _video := range videos {
-		the_user := &user.User{
-			ID:            int64(_user.ID),
-			Name:          _user.Username,
-			FollowCount:   123,
-			FollowerCount: 456,
-			IsFollow:      true,
-		}
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
-			Author:        (*video.User)(the_user),
+			Author:        (*video.User)(author),
 			PlayUrl:       _video.PlayUrl,
 			CoverUrl:      _video.CoverUrl,
 			FavoriteCount: _video.FavoriteCount,

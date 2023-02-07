@@ -55,3 +55,8 @@ func _followerlistMw() []app.HandlerFunc {
 	// your code...
 	return nil
 }
+
+func _actionMw() []app.HandlerFunc {
+	// your code...
+	return nil
+}

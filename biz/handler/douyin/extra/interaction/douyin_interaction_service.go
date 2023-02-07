@@ -56,7 +56,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
-		hlog.Error("Failed to bind and validate")
 		return
 	}
 
@@ -69,7 +68,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.Comment = nil
 
 		c.JSON(consts.StatusUnauthorized, resp)
-		hlog.Error("The token is invalid")
 		return
 	}
 
@@ -79,7 +77,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "User id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Failed to query user id in database")
 		return
 	}
 
@@ -89,7 +86,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Video id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Failed to query video id in database")
 		return
 	}
 
@@ -98,7 +94,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Fail to get action type"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Action type is not POST_COMMENT or DELETE_COMMENT")
 		return
 	}
 
@@ -134,7 +129,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Comment id does not exist"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Failed to query comment id in database")
 		return
 	}
 
@@ -143,7 +137,6 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "You can not delete comment that does not belong to you"
 		resp.Comment = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("You can not delete comment that does not belong to you")
 		return
 	}
 
@@ -170,7 +163,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
-		hlog.Error("Failed to bind and validate")
 		return
 	}
 
@@ -183,7 +175,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.CommentList = nil
 
 		c.JSON(consts.StatusUnauthorized, resp)
-		hlog.Error("The token is invalid")
 		return
 	}
 
@@ -193,7 +184,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "User id does not exist"
 		resp.CommentList = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Failed to query user id in database")
 		return
 	}
 
@@ -203,7 +193,6 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Video id does not exist"
 		resp.CommentList = nil
 		c.JSON(consts.StatusBadRequest, resp)
-		hlog.Error("Failed to query video id in database")
 		return
 	}
 

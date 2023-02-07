@@ -37,3 +37,4 @@ dumped_hertz_remote_config.json
 tiktok-backend
 .secrets
 /files
+.hz

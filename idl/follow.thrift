@@ -37,7 +37,7 @@ struct douyinRelationFollowerListResponse {
 }
 
 service douyinFollowService {
-    douyinRelationActionResponse FollowAction(1: douyinRelationActionRequest req) (api.post="/douyin/relation/action")
+    douyinRelationActionResponse FollowAction(1: douyinRelationActionRequest req) (api.post="/douyin/relation/action/")
     douyinRelationFollowListResponse FollowList(1: douyinRelationFollowListRequest req) (api.get="/douyin/relation/follow/list/")
     douyinRelationFollowerListResponse FollowerList(1: douyinRelationFollowerListRequest req) (api.get="/douyin/relation/follower/list/")
 }
