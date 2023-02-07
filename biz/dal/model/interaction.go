@@ -76,14 +76,6 @@ func LikeVideo(l *Like) error {
 	return dal.DB.Create(l).Error
 }
 
-func VideoLikeCountIncrease(video_id int64) error {
-	return dal.DB.Model(Video{}).Where("id = ?", video_id).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error
-}
-
-func VideoLikeCountDecrease(video_id int64) error {
-	return dal.DB.Model(Video{}).Where("id = ?", video_id).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error
-}
-
 func IsVideoLiked(l *Like) error {
 	return dal.DB.Where("user_id = ? AND video_id = ?", l.UserId, l.VideoId).First(&l).Error
 }

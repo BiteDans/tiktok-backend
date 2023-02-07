@@ -7,7 +7,7 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
-	interaction "BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
+	"BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
 	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
@@ -28,8 +28,8 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(interaction.DouyinFavoriteActionResponse)
 
-	var user_id uint
-	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+	var userId uint
+	if userId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		c.JSON(consts.StatusUnauthorized, resp)
@@ -37,7 +37,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	_user := new(model.User)
-	if err = model.FindUserById(_user, user_id); err != nil {
+	if err = model.FindUserById(_user, userId); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		c.JSON(consts.StatusBadRequest, resp)
@@ -54,83 +54,61 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 
 	if req.ActionType == constants.LIKE_VIDEO {
 		like := new(model.Like)
-		like.UserId = int64(user_id)
+		like.UserId = int64(userId)
 		like.VideoId = req.VideoId
 
-		if err = model.IsVideoLiked(like); err != nil {
-			if err = model.LikeVideo(like); err != nil {
-				resp.StatusCode = -1
-				resp.StatusMsg = "Failed to like the video"
-				c.JSON(consts.StatusInternalServerError, resp)
-
-				hlog.Error("Failed to create like record into database")
-				return
-			}
-
-			if err = model.VideoLikeCountIncrease(req.VideoId); err != nil {
-				resp.StatusCode = -1
-				resp.StatusMsg = "Failed to increase liked video count"
-				c.JSON(consts.StatusInternalServerError, resp)
-
-				hlog.Error("Failed to increase liked video count in video database")
-				return
-			}
-
-			resp.StatusCode = 0
-			resp.StatusMsg = "Liked video successfully!"
-			c.JSON(consts.StatusOK, resp)
-			return
-		} else {
+		if err = model.IsVideoLiked(like); err == nil {
 			resp.StatusCode = 0
 			resp.StatusMsg = "Already liked the video"
-
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
-	} else if req.ActionType == constants.UNLIKE_VIDEO {
+		if err = model.LikeVideo(like); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to like the video"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to create like record into database for: %s", err.Error())
+			return
+		}
+
+		resp.StatusCode = 0
+		resp.StatusMsg = "Liked video successfully!"
+		c.JSON(consts.StatusOK, resp)
+		return
+
+	}
+
+	if req.ActionType == constants.UNLIKE_VIDEO {
 		like := new(model.Like)
-		like.UserId = int64(user_id)
+		like.UserId = int64(userId)
 		like.VideoId = req.VideoId
+
 		if err = model.IsVideoLiked(like); err != nil {
 			resp.StatusCode = 0
 			resp.StatusMsg = "Already unliked the video"
-
 			c.JSON(consts.StatusOK, resp)
 			return
-		} else {
-			if _video.FavoriteCount > 0 {
-				if err = model.UnlikeVideo(like); err != nil {
-					resp.StatusCode = -1
-					resp.StatusMsg = "Failed to unlike the video"
-					c.JSON(consts.StatusInternalServerError, resp)
-
-					hlog.Error("Failed to delete like record into database")
-					return
-				}
-				if err = model.VideoLikeCountDecrease(req.VideoId); err != nil {
-					resp.StatusCode = -1
-					resp.StatusMsg = "Failed to decrease liked video count"
-					c.JSON(consts.StatusInternalServerError, resp)
-
-					hlog.Error("Failed to decrease liked video count in video database")
-					return
-				}
-				resp.StatusCode = 0
-				resp.StatusMsg = "Unliked video successfully!"
-				c.JSON(consts.StatusOK, resp)
-				return
-			} else {
-				resp.StatusCode = -1
-				resp.StatusMsg = "Like count is not positive number, not deductible"
-				c.JSON(consts.StatusInternalServerError, resp)
-
-				hlog.Error("Like count is not positive number, not deductible")
-				return
-			}
 		}
 
+		if err = model.UnlikeVideo(like); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to unlike the video"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to delete like record into database for: %s", err.Error())
+			return
+		}
+
+		resp.StatusCode = 0
+		resp.StatusMsg = "Unliked video successfully!"
+		c.JSON(consts.StatusOK, resp)
+		return
 	}
+
+	resp.StatusCode = -1
+	resp.StatusMsg = "Undefined action!"
+	c.JSON(consts.StatusBadRequest, resp)
+	return
 }
 
 // FavoriteList .
@@ -149,6 +127,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	if _, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
+		resp.VideoList = nil
 		c.JSON(consts.StatusUnauthorized, resp)
 		return
 	}
@@ -157,18 +136,19 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	if err = model.FindUserById(_user, uint(req.UserId)); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
+		resp.VideoList = nil
 		c.JSON(consts.StatusBadRequest, resp)
 		return
 	}
 
-	var _liked_videos_id []*model.Like
-	_liked_videos_id, err = model.FindLikedVideosIdByUserId(req.UserId)
+	var likedVideosId []*model.Like
+	likedVideosId, err = model.FindLikedVideosIdByUserId(req.UserId)
 	if err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Failed to retrieve liked videos ID"
 		resp.VideoList = nil
 		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Error("Failed to query liked videos ID by user id in database")
+		hlog.Errorf("Failed to query liked videos ID by user id in database for: %s", err.Error())
 		return
 	}
 
@@ -176,48 +156,70 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 	resp.StatusMsg = "Liked videos retrieved successfully"
 	resp.VideoList = []*interaction.Video{}
 
-	for _, liked_video_id := range _liked_videos_id {
+	for _, likedVideoId := range likedVideosId {
 		video := new(model.Video)
-		if err = model.FindVideoById(video, uint(liked_video_id.VideoId)); err != nil {
+		if err = model.FindVideoById(video, uint(likedVideoId.VideoId)); err != nil {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Liked video id does not exist"
-			c.JSON(consts.StatusBadRequest, resp)
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Like video does not exist for: %s", err.Error())
 			return
 		}
 
-		the_user := new(model.User)
-		if err = model.FindUserById(the_user, uint(video.AuthorId)); err != nil {
+		var likeCount int64
+		if likeCount, err = model.GetLikeCount(likedVideoId.VideoId); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to get video like count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to get video like count from database for: %s", err.Error())
+			return
+		}
+
+		var commentCount int64
+		if commentCount, err = model.GetCommentCount(likedVideoId.VideoId); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to get video comment count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to get video comment count from database for: %s", err.Error())
+			return
+		}
+
+		theUser := new(model.User)
+		if err = model.FindUserById(theUser, uint(video.AuthorId)); err != nil {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Author of the video does not exist"
 			resp.VideoList = nil
 			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Error("The user with author id of the video is not exist")
+			hlog.Errorf("The user with author id of the video is not exist for: %s", err.Error())
 			return
 		}
 
-		format_user := &user.User{
-			ID:            int64(the_user.ID),
-			Name:          the_user.Username,
-			FollowCount:   int64(len(the_user.Followings)),
-			FollowerCount: int64(len(the_user.Followers)),
+		formatUser := &user.User{
+			ID:            int64(theUser.ID),
+			Name:          theUser.Username,
+			FollowCount:   int64(len(theUser.Followings)),
+			FollowerCount: int64(len(theUser.Followers)),
 			IsFollow:      false,
 		}
 
-		the_like := new(model.Like)
-		the_like.UserId = req.UserId
-		the_like.VideoId = int64(video.ID)
+		theLike := new(model.Like)
+		theLike.UserId = req.UserId
+		theLike.VideoId = int64(video.ID)
 
-		the_video := &interaction.Video{
+		theVideo := &interaction.Video{
 			ID:            int64(video.ID),
-			Author:        (*interaction.User)(format_user),
+			Author:        (*interaction.User)(formatUser),
 			PlayUrl:       video.PlayUrl,
 			CoverUrl:      video.CoverUrl,
-			FavoriteCount: video.FavoriteCount,
-			CommentCount:  video.CommentCount,
+			FavoriteCount: likeCount,
+			CommentCount:  commentCount,
 			IsFavorite:    true,
 			Title:         video.Title,
 		}
-		resp.VideoList = append(resp.VideoList, the_video)
+		resp.VideoList = append(resp.VideoList, theVideo)
 	}
 
 	c.JSON(consts.StatusOK, resp)
