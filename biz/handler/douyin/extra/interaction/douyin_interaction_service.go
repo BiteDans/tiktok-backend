@@ -283,7 +283,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			resp.Comment = nil
 			c.JSON(consts.StatusInternalServerError, resp)
 
-			hlog.Error("Failed to create comment into database")
+			hlog.Error("Failed to create comment into database ", err.Error())
 			return
 		}
 		resp.StatusCode = 0
@@ -321,7 +321,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Fail to delete comment"
 		resp.Comment = nil
 		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Error("Failed to delete comment in database")
+		hlog.Error("Failed to delete comment in database ", err.Error())
 		return
 	}
 	resp.StatusCode = 0
@@ -379,7 +379,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Failed to retrieve comments of the video"
 		resp.CommentList = nil
 		c.JSON(consts.StatusInternalServerError, resp)
-		hlog.Error("Failed to query comments id with video id in database")
+		hlog.Error("Failed to query comments id with video id in database ", err.Error())
 		return
 	}
 
@@ -394,7 +394,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			resp.StatusMsg = "User id does not exist in comment"
 			resp.CommentList = nil
 			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Error("The user with user id in comment is not exist")
+			hlog.Error("The user with user id in comment is not exist ", err.Error())
 			return
 		}
 
