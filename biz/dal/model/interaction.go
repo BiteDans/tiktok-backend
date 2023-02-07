@@ -50,6 +50,18 @@ func FindCommentById(id int64) (*Comment, error) {
 	return _comments, err
 }
 
+func GetCommentCount(id int64) (int64, error) {
+	var commentCount int64
+	err := dal.DB.Model(Comment{}).Where("video_id = ?", id).Count(&commentCount).Error
+	return commentCount, err
+}
+
+func GetLikeCount(id int64) (int64, error) {
+	var likeCount int64
+	err := dal.DB.Model(Like{}).Where("video_id = ?", id).Count(&likeCount).Error
+	return likeCount, err
+}
+
 func CreateComment(c *Comment) error {
 	return dal.DB.Create(c).Error
 }
