@@ -249,5 +249,9 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow.DouyinRelationFriendListResponse)
 
+	var friend_ids []uint
+
+	model.GetFriendListById(&friend_ids, 3)
+
 	c.JSON(consts.StatusOK, resp)
 }
