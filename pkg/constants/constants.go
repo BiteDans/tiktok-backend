@@ -8,4 +8,6 @@ const (
 	UNFOLLOW_ACTION = 0
 	POST_COMMENT    = 1
 	DELETE_COMMENT  = 2
+	LIKE_VIDEO      = 1
+	UNLIKE_VIDEO    = 2
 )
