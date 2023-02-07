@@ -7,12 +7,11 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
+	interaction "BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
 	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
-	"github.com/cloudwego/hertz/pkg/common/hlog"
-
-	interaction "BiteDans.com/tiktok-backend/biz/model/douyin/extra/interaction"
 	"github.com/cloudwego/hertz/pkg/app"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
 
@@ -296,6 +295,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 			CreateDate: comment.CreatedAt.Format("01-02"),
 		}
 		c.JSON(consts.StatusOK, resp)
+		return
 	}
 
 	//Delete comment
