@@ -80,6 +80,18 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
+func GetFollowInfoByUsers(from_user *model.User, to_user *model.User, user_resp *follow.User) error {
+	var err error
+	user_resp.ID = int64(to_user.ID)
+	user_resp.Name = to_user.Username
+	user_resp.FollowCount = model.GetFollowCount(to_user)
+	user_resp.FollowerCount = model.GetFollowerCount(to_user)
+	if user_resp.IsFollow, err = model.GetFollowRelation(from_user.ID, to_user.ID); err != nil {
+		return err
+	}
+	return nil
+}
+
 // FollowList .
 // @router /douyin/relation/follow/list/ [GET]
 func FollowList(ctx context.Context, c *app.RequestContext) {
@@ -224,14 +236,18 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-func GetFollowInfoByUsers(from_user *model.User, to_user *model.User, user_resp *follow.User) error {
+// FriendList .
+// @router /douyin/relation/friend/list/ [GET]
+func FriendList(ctx context.Context, c *app.RequestContext) {
 	var err error
-	user_resp.ID = int64(to_user.ID)
-	user_resp.Name = to_user.Username
-	user_resp.FollowCount = model.GetFollowCount(to_user)
-	user_resp.FollowerCount = model.GetFollowerCount(to_user)
-	if user_resp.IsFollow, err = model.GetFollowRelation(from_user.ID, to_user.ID); err != nil {
-		return err
+	var req follow.DouyinRelationFriendListRequest
+	err = c.BindAndValidate(&req)
+	if err != nil {
+		c.String(consts.StatusBadRequest, err.Error())
+		return
 	}
-	return nil
+
+	resp := new(follow.DouyinRelationFriendListResponse)
+
+	c.JSON(consts.StatusOK, resp)
 }
