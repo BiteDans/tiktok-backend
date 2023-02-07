@@ -52,6 +52,13 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	if req.ActionType != constants.LIKE_VIDEO && req.ActionType != constants.UNLIKE_VIDEO {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Undefined action!"
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
+
 	if req.ActionType == constants.LIKE_VIDEO {
 		like := new(model.Like)
 		like.UserId = int64(userId)
@@ -79,36 +86,28 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 
 	}
 
-	if req.ActionType == constants.UNLIKE_VIDEO {
-		like := new(model.Like)
-		like.UserId = int64(userId)
-		like.VideoId = req.VideoId
+	like := new(model.Like)
+	like.UserId = int64(userId)
+	like.VideoId = req.VideoId
 
-		if err = model.IsVideoLiked(like); err != nil {
-			resp.StatusCode = 0
-			resp.StatusMsg = "Already unliked the video"
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		if err = model.UnlikeVideo(like); err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Failed to unlike the video"
-			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("Failed to delete like record into database for: %s", err.Error())
-			return
-		}
-
+	if err = model.IsVideoLiked(like); err != nil {
 		resp.StatusCode = 0
-		resp.StatusMsg = "Unliked video successfully!"
+		resp.StatusMsg = "Already unliked the video"
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
-	resp.StatusCode = -1
-	resp.StatusMsg = "Undefined action!"
-	c.JSON(consts.StatusBadRequest, resp)
-	return
+	if err = model.UnlikeVideo(like); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Failed to unlike the video"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Failed to delete like record into database for: %s", err.Error())
+		return
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Unliked video successfully!"
+	c.JSON(consts.StatusOK, resp)
 }
 
 // FavoriteList .
