@@ -57,7 +57,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 		like.UserId = int64(user_id)
 		like.VideoId = req.VideoId
 
-		if err = model.IfUserLikedVideo(like); err != nil {
+		if err = model.IsVideoLiked(like); err != nil {
 			if err = model.LikeVideo(like); err != nil {
 				resp.StatusCode = -1
 				resp.StatusMsg = "Failed to like the video"
@@ -92,7 +92,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 		like := new(model.Like)
 		like.UserId = int64(user_id)
 		like.VideoId = req.VideoId
-		if err = model.IfUserLikedVideo(like); err != nil {
+		if err = model.IsVideoLiked(like); err != nil {
 			resp.StatusCode = 0
 			resp.StatusMsg = "Already unliked the video"
 

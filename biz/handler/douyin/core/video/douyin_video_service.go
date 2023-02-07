@@ -74,6 +74,15 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			IsFollow:      isFollow,
 		}
 
+		like := new(model.Like)
+		like.UserId = int64(curUserId)
+		like.VideoId = int64(_video.ID)
+		isFavorite := true
+		err = model.IsVideoLiked(like)
+		if err != nil {
+			isFavorite = false
+		}
+
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(the_user),
@@ -81,7 +90,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			CoverUrl:      _video.CoverUrl,
 			FavoriteCount: _video.FavoriteCount,
 			CommentCount:  _video.CommentCount,
-			IsFavorite:    false,
+			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
 		resp.VideoList = append(resp.VideoList, the_video)
@@ -247,6 +256,16 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	author.IsFollow = isFollowingAuthor
 
 	for _, _video := range videos {
+
+		like := new(model.Like)
+		like.UserId = int64(userId)
+		like.VideoId = int64(_video.ID)
+		isFavorite := true
+		err = model.IsVideoLiked(like)
+		if err != nil {
+			isFavorite = false
+		}
+
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(author),
@@ -254,7 +273,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 			CoverUrl:      _video.CoverUrl,
 			FavoriteCount: _video.FavoriteCount,
 			CommentCount:  _video.CommentCount,
-			IsFavorite:    false,
+			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
 		resp.VideoList = append(resp.VideoList, the_video)
