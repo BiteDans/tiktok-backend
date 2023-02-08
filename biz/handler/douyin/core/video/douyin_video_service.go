@@ -74,14 +74,37 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			IsFollow:      isFollow,
 		}
 
+		like := new(model.Like)
+		like.UserId = int64(curUserId)
+		like.VideoId = int64(_video.ID)
+		isFavorite := true
+		err = model.IsVideoLiked(like)
+		if err != nil {
+			isFavorite = false
+		}
+
+		likeCount, err := model.GetLikeCount(int64(_video.ID))
+		if err != nil {
+			hlog.Errorf("Failed to get video like count from database with error: %s", err.Error())
+			c.String(consts.StatusInternalServerError, err.Error())
+			return
+		}
+
+		commentCount, err := model.GetCommentCount(int64(_video.ID))
+		if err != nil {
+			hlog.Errorf("Failed to get video comment count from database with error: %s", err.Error())
+			c.String(consts.StatusInternalServerError, err.Error())
+			return
+		}
+
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(the_user),
 			PlayUrl:       _video.PlayUrl,
 			CoverUrl:      _video.CoverUrl,
-			FavoriteCount: _video.FavoriteCount,
-			CommentCount:  _video.CommentCount,
-			IsFavorite:    false,
+			FavoriteCount: likeCount,
+			CommentCount:  commentCount,
+			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
 		resp.VideoList = append(resp.VideoList, the_video)
@@ -247,14 +270,38 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	author.IsFollow = isFollowingAuthor
 
 	for _, _video := range videos {
+
+		like := new(model.Like)
+		like.UserId = int64(userId)
+		like.VideoId = int64(_video.ID)
+		isFavorite := true
+		err = model.IsVideoLiked(like)
+		if err != nil {
+			isFavorite = false
+		}
+
+		likeCount, err := model.GetLikeCount(int64(_video.ID))
+		if err != nil {
+			hlog.Errorf("Failed to get video like count from database with error: %s", err.Error())
+			c.String(consts.StatusInternalServerError, err.Error())
+			return
+		}
+
+		commentCount, err := model.GetCommentCount(int64(_video.ID))
+		if err != nil {
+			hlog.Errorf("Failed to get video comment count from database with error: %s", err.Error())
+			c.String(consts.StatusInternalServerError, err.Error())
+			return
+		}
+
 		the_video := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(author),
 			PlayUrl:       _video.PlayUrl,
 			CoverUrl:      _video.CoverUrl,
-			FavoriteCount: _video.FavoriteCount,
-			CommentCount:  _video.CommentCount,
-			IsFavorite:    false,
+			FavoriteCount: likeCount,
+			CommentCount:  commentCount,
+			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
 		resp.VideoList = append(resp.VideoList, the_video)

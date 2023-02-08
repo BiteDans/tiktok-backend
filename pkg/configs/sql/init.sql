@@ -10,7 +10,7 @@
 --     KEY          `idx_username` (`username`) COMMENT 'Username index'
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='User account table';
 
-CREATE TABLE `video`
+/*CREATE TABLE `video`
 (
     `id`         bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'PK',
     `author_id`   bigint unsigned NOT NULL COMMENT 'Author (user) id',
@@ -39,3 +39,16 @@ CREATE TABLE `message`
     `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'Message delete time',
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Message table';
+CREATE TABLE `comment`
+(
+    `id`         bigint unsigned NOT NULL AUTO_INCREMENT COMMENT 'PK',
+    `user_id`    bigint unsigned NOT NULL COMMENT 'user id of the comment',
+    `video_id`    bigint unsigned NOT NULL COMMENT 'video id of the comment',
+    `content`    varchar(256) NOT NULL DEFAULT '' COMMENT 'the content of comment',
+    `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'User account create time',
+    `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'User account update time',
+    `deleted_at` timestamp NULL DEFAULT NULL COMMENT 'User account delete time',
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Comment info table';
+
+ */
