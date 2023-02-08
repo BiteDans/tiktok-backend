@@ -303,7 +303,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		friendUser.IsFollow = userInfo.IsFollow
 		friendUser.Message = "This is the latest message"
 		friendUser.MsgType = 1
-		//  friendUser.Avatar = ""
+		friendUser.Avatar = "http://images.nowcoder.com/head/22t.png"
 
 		respList = append(respList, friendUser)
 
