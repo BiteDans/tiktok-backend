@@ -222,9 +222,9 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		userResp := new(follow.User)
 		if err := GetFollowInfoByUsers(curUser, u, userResp); err != nil {
 			resp.StatusCode = -1
-			resp.StatusMsg = "Failed to get follower list"
+			resp.StatusMsg = "Failed to get follower info"
 			c.JSON(consts.StatusInternalServerError, resp)
-			hlog.Errorf("Failed to get follower list: %v", err)
+			hlog.Errorf("Failed to get follower info: %v", err)
 			return
 		}
 		respList = append(respList, userResp)
@@ -249,9 +249,69 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow.DouyinRelationFriendListResponse)
 
-	var friend_ids []uint
+	/* get userId by token*/
+	var curUserId uint
+	if curUserId, err = utils.GetIdFromToken(req.Token); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Invalid token"
+		resp.UserList = nil
+		c.JSON(consts.StatusUnauthorized, resp)
+		return
+	}
+	/* get req user*/
+	curUser := new(model.User)
+	if err = model.FindUserById(curUser, curUserId); err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Current user id does not exist"
+		resp.UserList = nil
+		c.JSON(consts.StatusBadRequest, resp)
+		return
+	}
 
-	model.GetFriendListById(&friend_ids, 3)
+	/*get friend list*/
+	var friend_ids []uint
+	model.GetFriendListById(&friend_ids, int64(curUserId))
+
+	var respList []*follow.FriendUser
+	for _, id := range friend_ids {
+		friendUser := new(follow.FriendUser)
+
+		/*get user*/
+		targetUser := new(model.User)
+		if err = model.FindUserById(targetUser, id); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Target user id does not exist"
+			resp.UserList = nil
+			c.JSON(consts.StatusBadRequest, resp)
+			return
+		}
+
+		/*get userInfo*/
+		userInfo := new(follow.User)
+		if err := GetFollowInfoByUsers(curUser, targetUser, userInfo); err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to get friend info"
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Failed to get friend info: %v", err)
+			return
+		}
+
+		friendUser.ID = userInfo.ID
+		friendUser.Name = userInfo.Name
+		friendUser.FollowerCount = userInfo.FollowerCount
+		friendUser.FollowCount = userInfo.FollowCount
+		friendUser.IsFollow = userInfo.IsFollow
+		friendUser.Message = "This is the latest message"
+		friendUser.MsgType = 1
+		//  friendUser.Avatar = ""
+
+		respList = append(respList, friendUser)
+
+	}
+
+	resp.StatusCode = 0
+	resp.StatusMsg = "Friend list retrieved successfully"
+	resp.UserList = respList
 
 	c.JSON(consts.StatusOK, resp)
 }

@@ -68,7 +68,7 @@ func GetFollowerListByUser(uList *[]*User, user *User) error {
 	return dal.DB.Model(user).Association("Followers").Find(&uList)
 }
 
-func GetFriendListById(freind_ids *[]uint, id uint) error {
+func GetFriendListById(freind_ids *[]uint, id int64) error {
 	return dal.DB.Raw(
 		`SELECT fr1.follow_id FROM follow_relations AS fr1
 		 INNER JOIN follow_relations AS fr2
