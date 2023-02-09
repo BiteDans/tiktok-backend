@@ -80,13 +80,13 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	c.JSON(consts.StatusOK, resp)
 }
 
-func GetFollowInfoByUsers(from_user *model.User, to_user *model.User, user_resp *follow.User) error {
+func GetFollowInfoByUsers(fromUser *model.User, toUser *model.User, userResp *follow.User) error {
 	var err error
-	user_resp.ID = int64(to_user.ID)
-	user_resp.Name = to_user.Username
-	user_resp.FollowCount = model.GetFollowCount(to_user)
-	user_resp.FollowerCount = model.GetFollowerCount(to_user)
-	if user_resp.IsFollow, err = model.GetFollowRelation(from_user.ID, to_user.ID); err != nil {
+	userResp.ID = int64(toUser.ID)
+	userResp.Name = toUser.Username
+	userResp.FollowCount = model.GetFollowCount(toUser)
+	userResp.FollowerCount = model.GetFollowerCount(toUser)
+	if userResp.IsFollow, err = model.GetFollowRelation(fromUser.ID, toUser.ID); err != nil {
 		return err
 	}
 	return nil
@@ -269,11 +269,11 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	/*get friend list*/
-	var friend_ids []uint
-	model.GetFriendListById(&friend_ids, int64(curUserId))
+	var friendIds []uint
+	model.GetFriendListById(&friendIds, int64(curUserId))
 
 	var respList []*follow.FriendUser
-	for _, id := range friend_ids {
+	for _, id := range friendIds {
 		friendUser := new(follow.FriendUser)
 
 		/*get user*/
