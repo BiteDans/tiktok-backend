@@ -38,9 +38,9 @@ func FindCommentsByUserId(id int64) ([]*Comment, error) {
 	return _comments, err
 }
 
-func FindCommentsByUserIdAndVideoId(user_id int64, video_id int64) ([]*Comment, error) {
+func FindCommentsByUserIdAndVideoId(userId int64, videoId int64) ([]*Comment, error) {
 	var _comments []*Comment
-	err := dal.DB.Where("user_id = ? AND video_id = ?", user_id, video_id).Find(&_comments).Error
+	err := dal.DB.Where("user_id = ? AND video_id = ?", userId, videoId).Find(&_comments).Error
 	return _comments, err
 }
 
@@ -66,9 +66,9 @@ func CreateComment(c *Comment) error {
 	return dal.DB.Create(c).Error
 }
 
-func FindLikedVideosIdByUserId(user_id int64) ([]*Like, error) {
+func FindLikedVideosIdByUserId(userId int64) ([]*Like, error) {
 	var likes []*Like
-	err := dal.DB.Where("user_id = ?", user_id).Find(&likes).Error
+	err := dal.DB.Where("user_id = ?", userId).Find(&likes).Error
 	return likes, err
 }
 

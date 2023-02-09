@@ -247,8 +247,8 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(interaction.DouyinCommentActionResponse)
 
-	var user_id uint
-	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+	var userId uint
+	if userId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.Comment = nil
@@ -258,7 +258,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	_user := new(model.User)
-	if err = model.FindUserById(_user, user_id); err != nil {
+	if err = model.FindUserById(_user, userId); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.Comment = nil
@@ -285,7 +285,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 
 	if req.ActionType == constants.POST_COMMENT {
 		comment := new(model.Comment)
-		comment.UserId = int64(user_id)
+		comment.UserId = int64(userId)
 		comment.VideoId = req.VideoId
 		comment.Content = req.CommentText
 		if err = model.CreateComment(comment); err != nil {
@@ -319,7 +319,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	if comment.UserId != (int64(user_id)) {
+	if comment.UserId != (int64(userId)) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "You can not delete comment that does not belong to you"
 		resp.Comment = nil
@@ -355,8 +355,8 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(interaction.DouyinCommentListResponse)
 
-	var user_id uint
-	if user_id, err = utils.GetIdFromToken(req.Token); err != nil {
+	var userId uint
+	if userId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.CommentList = nil
@@ -366,7 +366,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 	}
 
 	_user := new(model.User)
-	if err = model.FindUserById(_user, user_id); err != nil {
+	if err = model.FindUserById(_user, userId); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.CommentList = nil
@@ -409,7 +409,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		format_user := &user.User{
+		formatUser := &user.User{
 			ID:            int64(the_user.ID),
 			Name:          the_user.Username,
 			FollowCount:   int64(len(the_user.Followings)),
@@ -417,13 +417,13 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			IsFollow:      false,
 		}
 
-		the_comment := &interaction.Comment{
+		theComment := &interaction.Comment{
 			ID:         int64(comment.ID),
-			User:       (*interaction.User)(format_user),
+			User:       (*interaction.User)(formatUser),
 			Content:    comment.Content,
 			CreateDate: comment.CreatedAt.Format("01-02"),
 		}
-		resp.CommentList = append(resp.CommentList, the_comment)
+		resp.CommentList = append(resp.CommentList, theComment)
 	}
 
 	c.JSON(consts.StatusOK, resp)

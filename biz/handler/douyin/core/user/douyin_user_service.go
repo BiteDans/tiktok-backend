@@ -47,7 +47,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp_user := &user.User{}
+	respUser := &user.User{}
 	var isFollow bool
 
 	isFollow, err = model.GetFollowRelation(curUserId, uint(req.UserId))
@@ -61,15 +61,15 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	resp_user.ID = int64(_user.ID)
-	resp_user.Name = _user.Username
-	resp_user.FollowCount = model.GetFollowCount(_user)
-	resp_user.FollowerCount = model.GetFollowerCount(_user)
-	resp_user.IsFollow = isFollow
+	respUser.ID = int64(_user.ID)
+	respUser.Name = _user.Username
+	respUser.FollowCount = model.GetFollowCount(_user)
+	respUser.FollowerCount = model.GetFollowerCount(_user)
+	respUser.IsFollow = isFollow
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
-	resp.User = resp_user
+	resp.User = respUser
 
 	c.JSON(consts.StatusOK, resp)
 }

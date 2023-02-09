@@ -97,7 +97,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		the_video := &video.Video{
+		theVideo := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(the_user),
 			PlayUrl:       _video.PlayUrl,
@@ -107,7 +107,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
-		resp.VideoList = append(resp.VideoList, the_video)
+		resp.VideoList = append(resp.VideoList, theVideo)
 		if resp.NextTime > _video.CreatedAt.UnixMilli() {
 			resp.NextTime = _video.CreatedAt.UnixMilli()
 		}
@@ -294,7 +294,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		the_video := &video.Video{
+		theVideo := &video.Video{
 			ID:            int64(_video.ID),
 			Author:        (*video.User)(author),
 			PlayUrl:       _video.PlayUrl,
@@ -304,7 +304,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 			IsFavorite:    isFavorite,
 			Title:         _video.Title,
 		}
-		resp.VideoList = append(resp.VideoList, the_video)
+		resp.VideoList = append(resp.VideoList, theVideo)
 	}
 
 	c.JSON(consts.StatusOK, resp)

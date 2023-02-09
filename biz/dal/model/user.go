@@ -29,14 +29,14 @@ func CreateUser(u *User) error {
 	return dal.DB.Create(u).Error
 }
 
-func GetFollowRelation(from_user_id uint, to_user_id uint) (bool, error) {
+func GetFollowRelation(fromUserId uint, toUserId uint) (bool, error) {
 	var err error
 
 	from_user := User{}
-	from_user.ID = from_user_id
+	from_user.ID = fromUserId
 
 	result := []User{}
-	err = dal.DB.Model(&from_user).Where("follow_id", to_user_id).Association("Followings").Find(&result)
+	err = dal.DB.Model(&from_user).Where("follow_id", toUserId).Association("Followings").Find(&result)
 	if err != nil {
 		return false, err
 	}
@@ -68,12 +68,12 @@ func GetFollowerListByUser(uList *[]*User, user *User) error {
 	return dal.DB.Model(user).Association("Followers").Find(&uList)
 }
 
-func GetFriendListById(freind_ids *[]uint, id int64) error {
+func GetFriendListById(friendIds *[]uint, id int64) error {
 	return dal.DB.Raw(
 		`SELECT fr1.follow_id FROM follow_relations AS fr1
 		 INNER JOIN follow_relations AS fr2
 		 ON fr1.follow_id = fr2.user_id
 		 AND fr1.user_id = fr2.follow_id
 		 WHERE fr1.user_id = ?
-		 ORDER BY 1`, id).Scan(freind_ids).Error
+		 ORDER BY 1`, id).Scan(friendIds).Error
 }
