@@ -33,7 +33,7 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 	if err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
-		c.String(consts.StatusUnauthorized, err.Error())
+		c.JSON(consts.StatusOK, err.Error())
 		return
 	}
 
@@ -42,7 +42,7 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Currrent user id does not exist"
 
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -51,7 +51,7 @@ func FollowAction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Target user id does not exist"
 
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -111,7 +111,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.UserList = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -120,7 +120,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Current user id does not exist"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 	/* get target User */
@@ -130,7 +130,7 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Target user id does not exist"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -183,7 +183,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.UserList = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -192,7 +192,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Current user id does not exist"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 	/* get target User */
@@ -202,7 +202,7 @@ func FollowerList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Target user id does not exist"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -255,7 +255,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.UserList = nil
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 	/* get req user*/
@@ -264,7 +264,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Current user id does not exist"
 		resp.UserList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -282,7 +282,7 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Target user id does not exist"
 			resp.UserList = nil
-			c.JSON(consts.StatusBadRequest, resp)
+			c.JSON(consts.StatusOK, resp)
 			return
 		}
 

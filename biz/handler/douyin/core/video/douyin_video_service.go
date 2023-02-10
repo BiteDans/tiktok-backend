@@ -133,7 +133,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	userId, err := utils.GetIdFromToken(req.Token)
 	if err != nil {
 		resp.StatusMsg = "Invalid token"
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -225,7 +225,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.VideoList = nil
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -235,7 +235,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.VideoList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
