@@ -17,14 +17,14 @@ import (
 // @router /douyin/message/action/ [POST]
 func MessageSend(ctx context.Context, c *app.RequestContext) {
 	var err error
-	var req message.DouyinRelationActionRequest
+	var req message.DouyinMessageActionRequest
 	err = c.BindAndValidate(&req)
 	if err != nil {
 		c.String(consts.StatusBadRequest, err.Error())
 		return
 	}
 
-	resp := new(message.DouyinRelationActionResponse)
+	resp := new(message.DouyinMessageActionResponse)
 
 	senderuser := new(model.User)
 	receiveruser := new(model.User)
@@ -137,13 +137,12 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 	resp.MessageList = []*message.Message{}
 
 	for _, _message := range _messages {
-		create_time := _message.CreatedAt.String()
 		theMessage := &message.Message{
 			ID:         int64(_message.ID),
 			ToUserId:   _message.ToUserId,
 			FromUserId: _message.FromUserId,
 			Content:    _message.Content,
-			CreateTime: create_time,
+			CreateTime: _message.CreatedAt.UnixMilli(),
 		}
 		resp.MessageList = append(resp.MessageList, theMessage)
 	}

@@ -295,13 +295,22 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 			hlog.Errorf("Failed to get friend info: %v", err)
 			return
 		}
-
+		
+		latestMessage, err := model.FindLatestMessage(int64(curUserId), int64(targetUser.ID))
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Unable to retrieve latest message."
+			resp.UserList = nil
+			hlog.Error("Failed to retrieve latest message: ", err.Error())
+			c.JSON(consts.StatusInternalServerError, resp)
+			return
+		}
 		friendUser.ID = userInfo.ID
 		friendUser.Name = userInfo.Name
 		friendUser.FollowerCount = userInfo.FollowerCount
 		friendUser.FollowCount = userInfo.FollowCount
 		friendUser.IsFollow = userInfo.IsFollow
-		friendUser.Message = "This is the latest message"
+		friendUser.Message = latestMessage.Content
 		friendUser.MsgType = 1
 		friendUser.Avatar = "http://images.nowcoder.com/head/22t.png"
 

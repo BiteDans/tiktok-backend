@@ -29,3 +29,9 @@ func FindMessageBySenderandReceiverId(m []*Message, senderId uint, receiverId ui
 func CreateMessage(m *Message) error {
 	return dal.DB.Create(m).Error
 }
+
+func FindLatestMessage(fromUserId int64, toUserId int64) (*Message, error) {
+	var message *Message
+	err := dal.DB.Where("to_user_id = ? AND from_user_id = ?", toUserId, fromUserId).Order("created_at desc").First(&message).Error
+	return message, err
+}
