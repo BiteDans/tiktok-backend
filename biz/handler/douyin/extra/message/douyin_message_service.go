@@ -33,7 +33,7 @@ func MessageSend(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -41,7 +41,7 @@ func MessageSend(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Sender user id does not exist"
 
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -49,7 +49,7 @@ func MessageSend(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Receiver user id does not exist"
 
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -69,7 +69,7 @@ func MessageSend(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Action type not defined"
 
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 
 	}
@@ -98,7 +98,7 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.MessageList = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -108,7 +108,7 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "This User id does not exist"
 		resp.MessageList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -118,7 +118,7 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Receiver id does not exist"
 		resp.MessageList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -128,7 +128,7 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Fail to retrieve messages from this user to specified user"
 		resp.MessageList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 

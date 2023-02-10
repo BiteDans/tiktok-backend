@@ -32,7 +32,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 	if userId, err = utils.GetIdFromToken(req.Token); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -40,7 +40,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 	if err = model.FindUserById(_user, userId); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -48,14 +48,14 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 	if err = model.FindVideoById(_video, uint(req.VideoId)); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Video id does not exist"
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
 	if req.ActionType != constants.LIKE_VIDEO && req.ActionType != constants.UNLIKE_VIDEO {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Undefined action!"
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -127,7 +127,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Invalid token"
 		resp.VideoList = nil
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -136,7 +136,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.VideoList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -253,7 +253,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.Comment = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -262,7 +262,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.Comment = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -271,7 +271,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Video id does not exist"
 		resp.Comment = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -279,7 +279,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Fail to get action type"
 		resp.Comment = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -315,7 +315,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Comment id does not exist"
 		resp.Comment = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -323,7 +323,7 @@ func CommentInteraction(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "You can not delete comment that does not belong to you"
 		resp.Comment = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -361,7 +361,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.CommentList = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -370,7 +370,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.CommentList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -379,7 +379,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Video id does not exist"
 		resp.CommentList = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 

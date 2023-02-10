@@ -33,7 +33,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		resp.StatusMsg = "Invalid token"
 		resp.User = nil
 
-		c.JSON(consts.StatusUnauthorized, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -43,7 +43,7 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		resp.StatusCode = -1
 		resp.StatusMsg = "User id does not exist"
 		resp.User = nil
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -95,15 +95,15 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 
 	if err = model.FindUserByUsername(user, req.Username); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to log in (Username not found)"
-		c.JSON(consts.StatusBadRequest, resp)
+		resp.StatusMsg = "Username not found"
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
 	if inputpassword != user.Password {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to log in (Incorrect password)"
-		c.JSON(consts.StatusBadRequest, resp)
+		resp.StatusMsg = "Incorrect password"
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -111,7 +111,7 @@ func UserLogin(ctx context.Context, c *app.RequestContext) {
 
 	if token, err = utils.GenerateJWT(user.ID); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to log in (Token generation failed)"
+		resp.StatusMsg = "Token generation failed"
 		c.JSON(consts.StatusInternalServerError, resp)
 
 		hlog.Errorf("Failed to generate token: %v", err)
@@ -143,7 +143,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 	if err = model.FindUserByUsername(user, req.Username); err == nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Username has been used"
-		c.JSON(consts.StatusBadRequest, resp)
+		c.JSON(consts.StatusOK, resp)
 		return
 	}
 
@@ -163,7 +163,7 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 
 	if token, err = utils.GenerateJWT(user.ID); err != nil {
 		resp.StatusCode = -1
-		resp.StatusMsg = "Failed to log in (Token generation failed)"
+		resp.StatusMsg = "Token generation failed"
 		c.JSON(consts.StatusInternalServerError, resp)
 
 		hlog.Errorf("Failed to generate token: %v", err)
