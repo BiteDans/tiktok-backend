@@ -123,10 +123,10 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	beforeTime := time.UnixMilli(req.PreMsgTime)
+	prevMsgTime := time.UnixMilli(req.PreMsgTime)
 	var _messages []*model.Message
 
-	if _messages, err = model.FindMessageBySenderandReceiverIdBeforeTime(_messages, userId, uint(req.ToUserId), beforeTime); err != nil {
+	if _messages, err = model.FindMessageBySenderAndReceiverIdAfterTime(_messages, userId, uint(req.ToUserId), prevMsgTime); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Fail to retrieve messages from this user to specified user"
 		resp.MessageList = nil

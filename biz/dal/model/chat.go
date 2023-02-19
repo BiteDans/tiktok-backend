@@ -22,7 +22,7 @@ func FindMessageById(m *Message, id uint) error {
 	return dal.DB.First(&m, id).Error
 }
 
-func FindMessageBySenderandReceiverIdBeforeTime(m []*Message, senderId uint, receiverId uint, time time.Time) ([]*Message, error) {
+func FindMessageBySenderAndReceiverIdAfterTime(m []*Message, senderId uint, receiverId uint, time time.Time) ([]*Message, error) {
 	var message []*Message
 	err := dal.DB.Where("((to_user_id = ? AND from_user_id = ?) OR (from_user_id = ? AND to_user_id = ?)) AND created_at > ?", receiverId, senderId, receiverId, senderId, time).Order("created_at asc").Find(&message).Error
 	return message, err
