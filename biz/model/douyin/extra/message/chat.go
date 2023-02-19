@@ -9,8 +9,9 @@ import (
 )
 
 type DouyinMessageChatRequest struct {
-	Token    string `thrift:"token,1" form:"token" json:"token" query:"token"`
-	ToUserId int64  `thrift:"toUserId,2" json:"toUserId" query:"to_user_id"`
+	Token      string `thrift:"token,1" form:"token" json:"token" query:"token"`
+	ToUserId   int64  `thrift:"toUserId,2" json:"toUserId" query:"to_user_id"`
+	PreMsgTime int64  `thrift:"preMsgTime,3" json:"preMsgTime" query:"pre_msg_time"`
 }
 
 func NewDouyinMessageChatRequest() *DouyinMessageChatRequest {
@@ -25,9 +26,14 @@ func (p *DouyinMessageChatRequest) GetToUserId() (v int64) {
 	return p.ToUserId
 }
 
+func (p *DouyinMessageChatRequest) GetPreMsgTime() (v int64) {
+	return p.PreMsgTime
+}
+
 var fieldIDToName_DouyinMessageChatRequest = map[int16]string{
 	1: "token",
 	2: "toUserId",
+	3: "preMsgTime",
 }
 
 func (p *DouyinMessageChatRequest) Read(iprot thrift.TProtocol) (err error) {
@@ -62,6 +68,16 @@ func (p *DouyinMessageChatRequest) Read(iprot thrift.TProtocol) (err error) {
 		case 2:
 			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField2(iprot); err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				if err = iprot.Skip(fieldTypeId); err != nil {
+					goto SkipFieldError
+				}
+			}
+		case 3:
+			if fieldTypeId == thrift.I64 {
+				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
 			} else {
@@ -117,6 +133,15 @@ func (p *DouyinMessageChatRequest) ReadField2(iprot thrift.TProtocol) error {
 	return nil
 }
 
+func (p *DouyinMessageChatRequest) ReadField3(iprot thrift.TProtocol) error {
+	if v, err := iprot.ReadI64(); err != nil {
+		return err
+	} else {
+		p.PreMsgTime = v
+	}
+	return nil
+}
+
 func (p *DouyinMessageChatRequest) Write(oprot thrift.TProtocol) (err error) {
 	var fieldId int16
 	if err = oprot.WriteStructBegin("douyinMessageChatRequest"); err != nil {
@@ -129,6 +154,10 @@ func (p *DouyinMessageChatRequest) Write(oprot thrift.TProtocol) (err error) {
 		}
 		if err = p.writeField2(oprot); err != nil {
 			fieldId = 2
+			goto WriteFieldError
+		}
+		if err = p.writeField3(oprot); err != nil {
+			fieldId = 3
 			goto WriteFieldError
 		}
 
@@ -182,6 +211,23 @@ WriteFieldBeginError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 begin error: ", p), err)
 WriteFieldEndError:
 	return thrift.PrependError(fmt.Sprintf("%T write field 2 end error: ", p), err)
+}
+
+func (p *DouyinMessageChatRequest) writeField3(oprot thrift.TProtocol) (err error) {
+	if err = oprot.WriteFieldBegin("preMsgTime", thrift.I64, 3); err != nil {
+		goto WriteFieldBeginError
+	}
+	if err := oprot.WriteI64(p.PreMsgTime); err != nil {
+		return err
+	}
+	if err = oprot.WriteFieldEnd(); err != nil {
+		goto WriteFieldEndError
+	}
+	return nil
+WriteFieldBeginError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 begin error: ", p), err)
+WriteFieldEndError:
+	return thrift.PrependError(fmt.Sprintf("%T write field 3 end error: ", p), err)
 }
 
 func (p *DouyinMessageChatRequest) String() string {

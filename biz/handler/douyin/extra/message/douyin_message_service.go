@@ -4,6 +4,7 @@ package message
 
 import (
 	"context"
+	"time"
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/pkg/utils"
@@ -122,9 +123,10 @@ func MessageHistory(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	beforeTime := time.UnixMilli(req.PreMsgTime)
 	var _messages []*model.Message
 
-	if _messages, err = model.FindMessageBySenderandReceiverId(_messages, userId, uint(req.ToUserId)); err != nil {
+	if _messages, err = model.FindMessageBySenderandReceiverIdBeforeTime(_messages, userId, uint(req.ToUserId), beforeTime); err != nil {
 		resp.StatusCode = -1
 		resp.StatusMsg = "Fail to retrieve messages from this user to specified user"
 		resp.MessageList = nil

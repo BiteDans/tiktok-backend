@@ -3,6 +3,7 @@ namespace go douyin.extra.message
 struct douyinMessageChatRequest {
     1: string token
     2: i64 toUserId (api.query="to_user_id")
+    3: i64 preMsgTime (api.query="pre_msg_time")
 }
 
 struct douyinMessageChatResponse {
