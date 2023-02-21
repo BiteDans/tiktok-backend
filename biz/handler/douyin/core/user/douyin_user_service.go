@@ -61,11 +61,41 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	userLikeReceivedCount, err := model.GetUserReceivedLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user like count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user like count for: %s", err.Error())
+		return
+	}
+
+	userLikeCount, err := model.GetUserLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user received like count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user received like count for: %s", err.Error())
+		return
+	}
+
+	userWorkCount, err := model.GetUserVideoCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user work count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user work count for: %s", err.Error())
+		return
+	}
+
 	respUser.ID = int64(_user.ID)
 	respUser.Name = _user.Username
 	respUser.FollowCount = model.GetFollowCount(_user)
 	respUser.FollowerCount = model.GetFollowerCount(_user)
 	respUser.IsFollow = isFollow
+	respUser.TotalFavorited = userLikeReceivedCount
+	respUser.WorkCount = userWorkCount
+	respUser.FavoriteCount = userLikeCount
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"

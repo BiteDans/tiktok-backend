@@ -60,9 +60,19 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 	}
 
 	if req.ActionType == constants.LIKE_VIDEO {
+
+		likedUserId, err := model.FindUserByVideo(req.VideoId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Failed to retrieve author id of the liked video"
+			hlog.Errorf("Failed to retrieve author id of the liked video for: %s", err.Error())
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
 		like := new(model.Like)
 		like.UserId = int64(userId)
 		like.VideoId = req.VideoId
+		like.LikedUserId = likedUserId
 
 		if err = model.IsVideoLiked(like); err == nil {
 			resp.StatusCode = 0
@@ -74,7 +84,7 @@ func FavoriteInteraction(ctx context.Context, c *app.RequestContext) {
 		if err = model.LikeVideo(like); err != nil {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Failed to like the video"
-			c.JSON(consts.StatusInternalServerError, resp)
+			c.JSON(consts.StatusOK, resp)
 			hlog.Errorf("Failed to create like record into database for: %s", err.Error())
 			return
 		}
@@ -167,7 +177,7 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		}
 
 		var likeCount int64
-		if likeCount, err = model.GetLikeCount(likedVideoId.VideoId); err != nil {
+		if likeCount, err = model.GetVideoLikeCount(likedVideoId.VideoId); err != nil {
 			resp.StatusCode = -1
 			resp.StatusMsg = "Failed to get video like count"
 			resp.VideoList = nil
@@ -206,12 +216,45 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		userLikeReceivedCount, err := model.GetUserReceivedLikeCount(video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user like count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user like count for: %s", err.Error())
+			return
+		}
+
+		userLikeCount, err := model.GetUserLikeCount(video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user received like count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user received like count for: %s", err.Error())
+			return
+		}
+
+		userWorkCount, err := model.GetUserVideoCount(video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user work count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user work count for: %s", err.Error())
+			return
+		}
+
 		formatUser := &user.User{
 			ID:            int64(theUser.ID),
 			Name:          theUser.Username,
 			FollowCount:   int64(len(theUser.Followings)),
 			FollowerCount: int64(len(theUser.Followers)),
 			IsFollow:      isFollow,
+			TotalFavorited: userLikeReceivedCount,
+			WorkCount:	userWorkCount,
+			FavoriteCount: userLikeCount,
 		}
 
 		theLike := new(model.Like)

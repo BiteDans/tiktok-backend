@@ -66,12 +66,45 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			isFollow, _ = model.GetFollowRelation(curUserId, uint(_video.AuthorId))
 		}
 
+		userLikeReceivedCount, err := model.GetUserReceivedLikeCount(_video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user like count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user like count for: %s", err.Error())
+			return
+		}
+
+		userLikeCount, err := model.GetUserLikeCount(_video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user received like count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user received like count for: %s", err.Error())
+			return
+		}
+
+		userWorkCount, err := model.GetUserVideoCount(_video.AuthorId)
+		if err != nil {
+			resp.StatusCode = -1
+			resp.StatusMsg = "Cannot get user work count"
+			resp.VideoList = nil
+			c.JSON(consts.StatusInternalServerError, resp)
+			hlog.Errorf("Cannot get user work count for: %s", err.Error())
+			return
+		}
+
 		the_user := &user.User{
 			ID:            int64(_video.AuthorId),
 			Name:          _video.AuthorUsername,
 			FollowCount:   model.GetFollowCount(author),
 			FollowerCount: model.GetFollowerCount(author),
 			IsFollow:      isFollow,
+			TotalFavorited: userLikeReceivedCount,
+			WorkCount:	userWorkCount,
+			FavoriteCount: userLikeCount,
 		}
 
 		like := new(model.Like)
@@ -83,7 +116,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			isFavorite = false
 		}
 
-		likeCount, err := model.GetLikeCount(int64(_video.ID))
+		likeCount, err := model.GetVideoLikeCount(int64(_video.ID))
 		if err != nil {
 			hlog.Errorf("Failed to get video like count from database with error: %s", err.Error())
 			c.String(consts.StatusInternalServerError, err.Error())
@@ -149,7 +182,7 @@ func VideoPublish(ctx context.Context, c *app.RequestContext) {
 	ext := filepath.Ext(file.Filename)
 
 	// unique video name: number of total videos + 1.ext
-	filename := strconv.Itoa(totalRows + 1)
+	filename := strconv.Itoa(int(totalRows) + 1)
 	fullFilename := filename + ext
 	fullImagename := filename + ".png"
 
@@ -253,12 +286,45 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 	resp.StatusMsg = "Publishing list info retrieved successfully"
 	resp.VideoList = []*video.Video{}
 
+	userLikeReceivedCount, err := model.GetUserReceivedLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user like count"
+		resp.VideoList = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user like count for: %s", err.Error())
+		return
+	}
+
+	userLikeCount, err := model.GetUserLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user received like count"
+		resp.VideoList = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user received like count for: %s", err.Error())
+		return
+	}
+
+	userWorkCount, err := model.GetUserVideoCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user work count"
+		resp.VideoList = nil
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user work count for: %s", err.Error())
+		return
+	}
+
 	author := &user.User{
 		ID:            int64(_user.ID),
 		Name:          _user.Username,
 		FollowCount:   model.GetFollowCount(_user),
 		FollowerCount: model.GetFollowerCount(_user),
 		IsFollow:      true,
+		TotalFavorited: userLikeReceivedCount,
+		WorkCount:	userWorkCount,
+		FavoriteCount: userLikeCount,
 	}
 
 	isFollowingAuthor, err := model.GetFollowRelation(userId, _user.ID)
@@ -280,7 +346,7 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 			isFavorite = false
 		}
 
-		likeCount, err := model.GetLikeCount(int64(_video.ID))
+		likeCount, err := model.GetVideoLikeCount(int64(_video.ID))
 		if err != nil {
 			hlog.Errorf("Failed to get video like count from database with error: %s", err.Error())
 			c.String(consts.StatusInternalServerError, err.Error())

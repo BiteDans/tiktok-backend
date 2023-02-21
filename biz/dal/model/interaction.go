@@ -16,6 +16,7 @@ type Like struct {
 	gorm.Model
 	UserId  int64 `json:"user_id" column:"user_id"`
 	VideoId int64 `json:"video_id" column:"video_id"`
+	LikedUserId int64 `json:"liked_user_id" column:"liked_user_id"`
 }
 
 func (c *Comment) TableName() string {
@@ -56,9 +57,21 @@ func GetCommentCount(id int64) (int64, error) {
 	return commentCount, err
 }
 
-func GetLikeCount(id int64) (int64, error) {
+func GetVideoLikeCount(id int64) (int64, error) {
 	var likeCount int64
 	err := dal.DB.Model(Like{}).Where("video_id = ?", id).Count(&likeCount).Error
+	return likeCount, err
+}
+
+func GetUserReceivedLikeCount(userId int64) (int64, error) {
+	var likeCount int64
+	err := dal.DB.Model(Like{}).Where("liked_user_id = ?", userId).Count(&likeCount).Error
+	return likeCount, err
+}
+
+func GetUserLikeCount(userId int64) (int64, error) {
+	var likeCount int64
+	err := dal.DB.Model(Like{}).Where("user_id = ?", userId).Count(&likeCount).Error
 	return likeCount, err
 }
 

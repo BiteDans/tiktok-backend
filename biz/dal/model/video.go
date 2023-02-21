@@ -28,6 +28,12 @@ func FindVideoById(v *Video, id uint) error {
 	return dal.DB.First(&v, id).Error
 }
 
+func FindUserByVideo(videoId int64) (int64, error) {
+	var v *Video
+	err := dal.DB.Where("id = ?", videoId).First(&v).Error
+	return v.AuthorId, err
+}
+
 func FindVideosByUserId(id int64) ([]*Video, error) {
 	var _videos []*Video
 	err := dal.DB.Where("author_id = ?", id).Find(&_videos).Error
@@ -38,10 +44,16 @@ func CreateVideo(v *Video) error {
 	return dal.DB.Create(v).Error
 }
 
-func GetVideoCount() (int, error) {
+func GetVideoCount() (int64, error) {
 	var totalRows int64
 	err := dal.DB.Model(Video{}).Count(&totalRows).Error
-	return int(totalRows), err
+	return totalRows, err
+}
+
+func GetUserVideoCount(id int64) (int64, error) {
+	var totalRows int64
+	err := dal.DB.Model(Video{}).Where("author_id = ?", id).Count(&totalRows).Error
+	return totalRows, err
 }
 
 func FindLatestVideos(time time.Time) ([]*Video, error) {
