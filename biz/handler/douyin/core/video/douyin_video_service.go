@@ -13,6 +13,7 @@ import (
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/video"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -96,7 +97,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		the_user := &user.User{
+		theUser := &user.User{
 			ID:            int64(_video.AuthorId),
 			Name:          _video.AuthorUsername,
 			FollowCount:   model.GetFollowCount(author),
@@ -105,6 +106,9 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			TotalFavorited: userLikeReceivedCount,
 			WorkCount:	userWorkCount,
 			FavoriteCount: userLikeCount,
+			Signature: constants.SIGNATURE,
+			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
+			Avatar: constants.PROFILE_PIC_ADDR,
 		}
 
 		like := new(model.Like)
@@ -132,7 +136,7 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 
 		theVideo := &video.Video{
 			ID:            int64(_video.ID),
-			Author:        (*video.User)(the_user),
+			Author:        (*video.User)(theUser),
 			PlayUrl:       _video.PlayUrl,
 			CoverUrl:      _video.CoverUrl,
 			FavoriteCount: likeCount,
@@ -325,6 +329,9 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		TotalFavorited: userLikeReceivedCount,
 		WorkCount:	userWorkCount,
 		FavoriteCount: userLikeCount,
+		Signature: constants.SIGNATURE,
+		BackgroundImage: constants.BACKGROUND_PIC_ADDR,
+		Avatar: constants.PROFILE_PIC_ADDR,
 	}
 
 	isFollowingAuthor, err := model.GetFollowRelation(userId, _user.ID)

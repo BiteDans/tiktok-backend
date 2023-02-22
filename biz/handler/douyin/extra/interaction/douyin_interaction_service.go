@@ -255,6 +255,9 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 			TotalFavorited: userLikeReceivedCount,
 			WorkCount:	userWorkCount,
 			FavoriteCount: userLikeCount,
+			Signature: constants.SIGNATURE,
+			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
+			Avatar: constants.PROFILE_PIC_ADDR,
 		}
 
 		theLike := new(model.Like)
@@ -458,6 +461,9 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			FollowCount:   int64(len(the_user.Followings)),
 			FollowerCount: int64(len(the_user.Followers)),
 			IsFollow:      false,
+			Signature: constants.SIGNATURE,
+			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
+			Avatar: constants.PROFILE_PIC_ADDR,
 		}
 
 		theComment := &interaction.Comment{

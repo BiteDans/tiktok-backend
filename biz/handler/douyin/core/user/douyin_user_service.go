@@ -7,6 +7,7 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
@@ -96,6 +97,9 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 	respUser.TotalFavorited = userLikeReceivedCount
 	respUser.WorkCount = userWorkCount
 	respUser.FavoriteCount = userLikeCount
+	respUser.Signature = constants.SIGNATURE
+	respUser.BackgroundImage = constants.BACKGROUND_PIC_ADDR
+	respUser.Avatar = constants.PROFILE_PIC_ADDR
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
