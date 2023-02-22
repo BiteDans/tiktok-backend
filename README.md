@@ -2,6 +2,8 @@
 
 Tiktok-backend is the backend module for Bytedance Bootcamp Tiktok project. We use Go, Hertz, Gorm and Docker to build this server.
 
+The backend (production) is hosted at http://35.206.100.23:8888 on Google Cloud Platform. Feel free to test it out.
+
 # Running the project
 
 Before running the project, make sure you have done the following steps:
