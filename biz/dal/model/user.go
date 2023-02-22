@@ -10,8 +10,6 @@ type User struct {
 	Username   string  `json:"username" column:"username"`
 	Password   string  `json:"password" column:"password"`
 	Avatar	   string  `json:"avatar" column:"avatar" gorm:"default:https://tiktok-bitedans.s3.us-west-1.amazonaws.com/%E5%A4%B4%E5%83%8F.jpg"`
-	BackgroundImage	   string  `json:"backgroundImage" column:"background_image" gorm:"default:https://tiktok-bitedans.s3.us-west-1.amazonaws.com/%E8%83%8C%E6%99%AF.jpg"`
-	Signature	   string  `json:"signature" column:"signature" gorm:"default:喜欢唱、跳、Rap、篮球。"`
 	Followings []*User `gorm:"many2many:follow_relations;joinForeignKey:user_id;JoinReferences:follow_id"`
 	Followers  []*User `gorm:"many2many:follow_relations;joinForeignKey:follow_id;JoinReferences:user_id"`
 }
