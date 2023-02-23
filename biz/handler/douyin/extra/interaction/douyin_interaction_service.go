@@ -246,6 +246,15 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		userAvatar, err := model.FindUserAvatar(video.AuthorId)
+		if err != nil {
+			userAvatar = constants.PROFILE_PIC_ADDR
+		}
+		userBackgroundImage, err := model.FindUserBackgroundImage(video.AuthorId)
+		if err != nil {
+			userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+		}
+
 		formatUser := &user.User{
 			ID:            int64(theUser.ID),
 			Name:          theUser.Username,
@@ -256,8 +265,8 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 			WorkCount:	userWorkCount,
 			FavoriteCount: userLikeCount,
 			Signature: constants.SIGNATURE,
-			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
-			Avatar: constants.PROFILE_PIC_ADDR,
+			BackgroundImage: userBackgroundImage,
+			Avatar: userAvatar,
 		}
 
 		theLike := new(model.Like)
@@ -455,6 +464,15 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		userAvatar, err := model.FindUserAvatar(int64(the_user.ID))
+		if err != nil {
+			userAvatar = constants.PROFILE_PIC_ADDR
+		}
+		userBackgroundImage, err := model.FindUserBackgroundImage(int64(the_user.ID))
+		if err != nil {
+			userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+		}
+
 		formatUser := &user.User{
 			ID:            int64(the_user.ID),
 			Name:          the_user.Username,
@@ -462,8 +480,8 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 			FollowerCount: int64(len(the_user.Followers)),
 			IsFollow:      false,
 			Signature: constants.SIGNATURE,
-			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
-			Avatar: constants.PROFILE_PIC_ADDR,
+			BackgroundImage: userBackgroundImage,
+			Avatar: userAvatar,
 		}
 
 		theComment := &interaction.Comment{

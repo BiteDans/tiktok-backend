@@ -15,6 +15,7 @@ require (
 )
 
 require (
+	github.com/google/uuid v1.3.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/stretchr/testify v1.7.1 // indirect
 	github.com/u2takey/go-utils v0.3.1 // indirect

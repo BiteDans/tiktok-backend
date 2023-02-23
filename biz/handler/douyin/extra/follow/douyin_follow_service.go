@@ -133,7 +133,17 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	targetUser.Avatar = constants.PROFILE_PIC_ADDR
+
+	userAvatar, err := model.FindUserAvatar(req.UserId)
+	if err != nil {
+		userAvatar = constants.PROFILE_PIC_ADDR
+	}
+	userBackgroundImage, err := model.FindUserBackgroundImage(req.UserId)
+	if err != nil {
+		userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+	}
+	targetUser.Avatar = userAvatar
+	targetUser.BackgroundImage = userBackgroundImage
 
 	var uList []*model.User
 
@@ -301,6 +311,16 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		if err != nil {
 			latestMessage.Content = "Say hi to your new friend!"
 		}
+
+		userAvatar, err := model.FindUserAvatar(userInfo.ID)
+		if err != nil {
+			userAvatar = constants.PROFILE_PIC_ADDR
+		}
+		userBackgroundImage, err := model.FindUserBackgroundImage(userInfo.ID)
+		if err != nil {
+			userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+		}
+		
 		friendUser.ID = userInfo.ID
 		friendUser.Name = userInfo.Name
 		friendUser.FollowerCount = userInfo.FollowerCount
@@ -308,7 +328,8 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		friendUser.IsFollow = userInfo.IsFollow
 		friendUser.Message = latestMessage.Content
 		friendUser.MsgType = 1
-		friendUser.Avatar = constants.BACKGROUND_PIC_ADDR
+		friendUser.Avatar = userAvatar
+		friendUser.BackgroundImage = userBackgroundImage
 
 		respList = append(respList, friendUser)
 

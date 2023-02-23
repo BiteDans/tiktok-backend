@@ -97,6 +97,16 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		userAvatar, err := model.FindUserAvatar(_video.AuthorId)
+		if err != nil {
+			userAvatar = constants.PROFILE_PIC_ADDR
+		}
+
+		userBackgroundImage, err := model.FindUserBackgroundImage(_video.AuthorId)
+		if err != nil {
+			userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+		}
+
 		theUser := &user.User{
 			ID:            int64(_video.AuthorId),
 			Name:          _video.AuthorUsername,
@@ -107,8 +117,8 @@ func VideoFeed(ctx context.Context, c *app.RequestContext) {
 			WorkCount:	userWorkCount,
 			FavoriteCount: userLikeCount,
 			Signature: constants.SIGNATURE,
-			BackgroundImage: constants.BACKGROUND_PIC_ADDR,
-			Avatar: constants.PROFILE_PIC_ADDR,
+			BackgroundImage: userBackgroundImage,
+			Avatar: userAvatar,
 		}
 
 		like := new(model.Like)
@@ -320,6 +330,16 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	userAvatar, err := model.FindUserAvatar(int64(_user.ID))
+	if err != nil {
+		userAvatar = constants.PROFILE_PIC_ADDR
+	}
+
+	userBackgroundImage, err := model.FindUserBackgroundImage(int64(_user.ID))
+	if err != nil {
+		userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+	}
+
 	author := &user.User{
 		ID:            int64(_user.ID),
 		Name:          _user.Username,
@@ -330,8 +350,8 @@ func VideoPublishList(ctx context.Context, c *app.RequestContext) {
 		WorkCount:	userWorkCount,
 		FavoriteCount: userLikeCount,
 		Signature: constants.SIGNATURE,
-		BackgroundImage: constants.BACKGROUND_PIC_ADDR,
-		Avatar: constants.PROFILE_PIC_ADDR,
+		BackgroundImage: userBackgroundImage,
+		Avatar: userAvatar,
 	}
 
 	isFollowingAuthor, err := model.GetFollowRelation(userId, _user.ID)
