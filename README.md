@@ -1,8 +1,16 @@
 # Intro
 
-Tiktok-backend is the backend module for Bytedance Bootcamp Tiktok project. We use Go, Hertz, Gorm and Docker to build this server.
+Tiktok-backend is the backend module for Bytedance Bootcamp Tiktok project. We use Go, Hertz, Gorm and Docker to build this server, GCP to host the project and AWS S3 to store the files.
 
-# Running the project
+The backend (production) is hosted at http://35.206.100.23:8888 on Google Cloud Platform. Feel free to test it out.
+
+_Important_: Make sure to download your apk at <a>https://tiktok-bitedans.s3.us-west-1.amazonaws.com/app-release.apk</a>!
+
+# Using the app
+
+After installing the apk, you may double-click on the “我” icon located at the botton right to set the server address, which is in the Intro section.
+
+# Running the server
 
 Before running the project, make sure you have done the following steps:
 

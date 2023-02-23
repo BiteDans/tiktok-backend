@@ -134,6 +134,17 @@ func FollowList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	userAvatar, err := model.FindUserAvatar(req.UserId)
+	if err != nil {
+		userAvatar = constants.PROFILE_PIC_ADDR
+	}
+	userBackgroundImage, err := model.FindUserBackgroundImage(req.UserId)
+	if err != nil {
+		userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+	}
+	targetUser.Avatar = userAvatar
+	targetUser.BackgroundImage = userBackgroundImage
+
 	var uList []*model.User
 
 	if err = model.GetFollowListByUser(&uList, targetUser); err != nil {
@@ -298,13 +309,18 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		
 		latestMessage, err := model.FindLatestMessage(int64(curUserId), int64(targetUser.ID))
 		if err != nil {
-			resp.StatusCode = -1
-			resp.StatusMsg = "Unable to retrieve latest message."
-			resp.UserList = nil
-			hlog.Error("Failed to retrieve latest message: ", err.Error())
-			c.JSON(consts.StatusInternalServerError, resp)
-			return
+			latestMessage.Content = "Say hi to your new friend!"
 		}
+
+		userAvatar, err := model.FindUserAvatar(userInfo.ID)
+		if err != nil {
+			userAvatar = constants.PROFILE_PIC_ADDR
+		}
+		userBackgroundImage, err := model.FindUserBackgroundImage(userInfo.ID)
+		if err != nil {
+			userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+		}
+		
 		friendUser.ID = userInfo.ID
 		friendUser.Name = userInfo.Name
 		friendUser.FollowerCount = userInfo.FollowerCount
@@ -312,7 +328,8 @@ func FriendList(ctx context.Context, c *app.RequestContext) {
 		friendUser.IsFollow = userInfo.IsFollow
 		friendUser.Message = latestMessage.Content
 		friendUser.MsgType = 1
-		friendUser.Avatar = "http://images.nowcoder.com/head/22t.png"
+		friendUser.Avatar = userAvatar
+		friendUser.BackgroundImage = userBackgroundImage
 
 		respList = append(respList, friendUser)
 

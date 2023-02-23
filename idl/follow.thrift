@@ -6,6 +6,12 @@ struct User {
     3: i64 followCount (api.body="follow_count")
     4: i64 followerCount (api.body="follower_count")
     5: bool isFollow (api.body="is_follow")
+    6: string avatar 
+    7: string backgroundImage (api.body="background_image")
+    8: string signature
+    9: i64 totalFavorited (api.body="total_favorited")
+    10: i64 workCount (api.body="work_count")
+    11: i64 favoriteCount (api.body="favorite_count")
 }
 
 struct FriendUser {
@@ -14,9 +20,14 @@ struct FriendUser {
     3: i64 followCount (api.body="follow_count")
     4: i64 followerCount (api.body="follower_count")
     5: bool isFollow (api.body="is_follow")
-    6: string avatar
-    7: string message
-    8: i64 msgType (api.body="msg_type")
+    6: string avatar 
+    7: string backgroundImage (api.body="background_image")
+    8: string signature
+    9: i64 totalFavorited (api.body="total_favorited")
+    10: i64 workCount (api.body="work_count")
+    11: i64 favoriteCount (api.body="favorite_count")
+    12: string message
+    13: i64 msgType (api.body="msg_type")
 }
 
 struct douyinRelationActionRequest {

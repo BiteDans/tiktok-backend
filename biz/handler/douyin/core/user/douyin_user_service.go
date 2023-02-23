@@ -7,10 +7,12 @@ import (
 
 	"BiteDans.com/tiktok-backend/biz/dal/model"
 	"BiteDans.com/tiktok-backend/biz/model/douyin/core/user"
+	"BiteDans.com/tiktok-backend/pkg/constants"
 	"BiteDans.com/tiktok-backend/pkg/utils"
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
+	"github.com/google/uuid"
 )
 
 // UserInfo .
@@ -61,11 +63,54 @@ func UserInfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
+	userLikeReceivedCount, err := model.GetUserReceivedLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user like count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user like count for: %s", err.Error())
+		return
+	}
+
+	userLikeCount, err := model.GetUserLikeCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user received like count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user received like count for: %s", err.Error())
+		return
+	}
+
+	userWorkCount, err := model.GetUserVideoCount(int64(_user.ID))
+	if err != nil {
+		resp.StatusCode = -1
+		resp.StatusMsg = "Cannot get user work count"
+		c.JSON(consts.StatusInternalServerError, resp)
+		hlog.Errorf("Cannot get user work count for: %s", err.Error())
+		return
+	}
+
+	userAvatar, err := model.FindUserAvatar(int64(_user.ID))
+	if err != nil {
+		userAvatar = constants.PROFILE_PIC_ADDR
+	}
+
+	userBackgroundImage, err := model.FindUserBackgroundImage(int64(_user.ID))
+	if err != nil {
+		userBackgroundImage = constants.BACKGROUND_PIC_ADDR
+	}
+
 	respUser.ID = int64(_user.ID)
 	respUser.Name = _user.Username
 	respUser.FollowCount = model.GetFollowCount(_user)
 	respUser.FollowerCount = model.GetFollowerCount(_user)
 	respUser.IsFollow = isFollow
+	respUser.TotalFavorited = userLikeReceivedCount
+	respUser.WorkCount = userWorkCount
+	respUser.FavoriteCount = userLikeCount
+	respUser.Signature = constants.SIGNATURE
+	respUser.BackgroundImage = userBackgroundImage
+	respUser.Avatar = userAvatar
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "User info retrieved successfully"
@@ -149,6 +194,8 @@ func UserRegister(ctx context.Context, c *app.RequestContext) {
 
 	user.Username = req.Username
 	user.Password = req.Password
+	user.Avatar = "https://api.dicebear.com/5.x/bottts-neutral/png?seed=" + uuid.NewString()
+	user.BackgroundImage = "https://api.dicebear.com/5.x/thumbs/png?seed=" + uuid.NewString()
 
 	if err = model.CreateUser(user); err != nil {
 		resp.StatusCode = -1

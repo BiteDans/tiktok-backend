@@ -9,6 +9,8 @@ type User struct {
 	gorm.Model
 	Username   string  `json:"username" column:"username"`
 	Password   string  `json:"password" column:"password"`
+	Avatar	   string  `json:"avatar" column:"avatar"`
+	BackgroundImage	   string  `json:"background_image" column:"background_image"`
 	Followings []*User `gorm:"many2many:follow_relations;joinForeignKey:user_id;JoinReferences:follow_id"`
 	Followers  []*User `gorm:"many2many:follow_relations;joinForeignKey:follow_id;JoinReferences:user_id"`
 }
@@ -19,6 +21,18 @@ func (u *User) TableName() string {
 
 func FindUserById(u *User, id uint) error {
 	return dal.DB.First(&u, id).Error
+}
+
+func FindUserAvatar(id int64) (string, error) {
+	var avatar string
+	err := dal.DB.Model(&User{}).Select("avatar").Where("id = ?", id).First(&avatar).Error
+	return avatar, err
+}
+
+func FindUserBackgroundImage(id int64) (string, error) {
+	var backgroundImage string
+	err := dal.DB.Model(&User{}).Select("background_image").Where("id = ?", id).First(&backgroundImage).Error
+	return backgroundImage, err
 }
 
 func FindUserByUsername(u *User, username string) error {
